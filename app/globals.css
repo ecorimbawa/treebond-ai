@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --agriva-green-900: #163d2a;
+  --agriva-green-700: #246b45;
+  --agriva-green-500: #3e8e5b;
+  --agriva-green-100: #ddeee3;
+
+  --harvest-600: #b7791f;
+  --harvest-400: #d9a441;
+  --harvest-100: #f8ebcb;
+
+  --background: #fafaf7;
+  --surface: #ffffff;
+  --surface-muted: #f3f5f1;
+
+  --text-primary: #18201b;
+  --text-secondary: #667069;
+  --text-muted: #929a94;
+
+  --border: #e2e7e2;
+
+  --success: #278653;
+  --warning: #c88924;
+  --error: #c84b45;
+
+  --onchain: #3154d5;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text-primary);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
 }
