@@ -1,34 +1,65 @@
 @import "tailwindcss";
 
 :root {
-  --agriva-green-900: #163d2a;
-  --agriva-green-700: #246b45;
-  --agriva-green-500: #3e8e5b;
-  --agriva-green-100: #ddeee3;
+  /* Brand */
+  --primary-900: #9e3514;
+  --primary-700: #d95527;
+  --primary-500: #ff7e41;
+  --primary-100: #ffe0d1;
 
-  --harvest-600: #b7791f;
-  --harvest-400: #d9a441;
-  --harvest-100: #f8ebcb;
+  /* Accent */
+  --accent-600: #312319;
+  --accent-400: #6b5546;
+  --accent-100: #e9ddd3;
 
-  --background: #fafaf7;
-  --surface: #ffffff;
-  --surface-muted: #f3f5f1;
+  /* Surface */
+  --background: #fff5e3;
+  --surface: #fffaf1;
+  --surface-muted: #f3e8d5;
 
-  --text-primary: #18201b;
-  --text-secondary: #667069;
-  --text-muted: #929a94;
+  /* Text */
+  --text-primary: #312319;
+  --text-secondary: #685448;
+  --text-muted: #9a8577;
 
-  --border: #e2e7e2;
+  /* Border */
+  --border: #e3d3c0;
 
-  --success: #278653;
-  --warning: #c88924;
-  --error: #c84b45;
+  /* Semantic */
+  --success: #3d7a57;
+  --warning: #d99a32;
+  --error: #c94a3d;
 
-  --onchain: #3154d5;
+  /* Optional */
+  --onchain: #6657b8;
 }
 
 @theme inline {
+  --color-primary-900: var(--primary-900);
+  --color-primary-700: var(--primary-700);
+  --color-primary-500: var(--primary-500);
+  --color-primary-100: var(--primary-100);
+
+  --color-accent-600: var(--accent-600);
+  --color-accent-400: var(--accent-400);
+  --color-accent-100: var(--accent-100);
+
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-border: var(--border);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
+  --color-onchain: var(--onchain);
+
   --color-foreground: var(--text-primary);
   --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);

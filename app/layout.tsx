@@ -13,9 +13,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agriva — Verified Harvests. On-chain Assets.",
+  title: "EcoRimbawa — Verifiable Indigenous Forest Conservation",
   description:
-    "Agriva connects real farming records, verified harvests, and blockchain to create traceable agricultural Real-World Assets.",
+    "EcoRimbawa connects indigenous territory documentation, forest monitoring, decentralized verification, and blockchain to create transparent and economically sustainable conservation.",
+  keywords: [
+    "Indigenous Forest Conservation",
+    "Tanah Adat",
+    "dMRV",
+    "ReFi",
+    "RWA",
+    "Carbon Credit",
+    "Forest Monitoring",
+    "Arbitrum",
+    "Blockchain Conservation",
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
