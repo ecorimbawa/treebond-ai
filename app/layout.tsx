@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agriva — Verified Harvests. On-chain Assets.",
+  title: "TreeBond AI - Making Living Assets Verifiable On-Chain.",
   description:
-    "Agriva connects real farming records, verified harvests, and blockchain to create traceable agricultural Real-World Assets.",
+    "TreeBond AI turns real trees into continuously monitored, independently verified digital assets — connecting sponsors, field operators, and verifiers around one living record of proof.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
