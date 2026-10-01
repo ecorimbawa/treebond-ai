@@ -1,20 +1,20 @@
-import { connectDB } from '@/lib/db/connection';
-import { Tree } from '@/models';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from "next/server";
+import { connectDB } from "@/lib/db/connection";
+import { Tree } from "@/models";
 
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const skip = parseInt(searchParams.get('skip') || '0');
-    const status = searchParams.get('status');
-    const species = searchParams.get('species');
-    const projectId = searchParams.get('projectId');
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
+    const skip = parseInt(searchParams.get("skip") || "0", 10);
+    const status = searchParams.get("status");
+    const species = searchParams.get("species");
+    const projectId = searchParams.get("projectId");
 
     // Build filter
-    const filter: any = {};
+    const filter: Record<string, string> = {};
     if (status) filter.status = status;
     if (species) filter.species = species;
     if (projectId) filter.projectId = projectId;
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const trees = await Tree.find(filter)
       .limit(limit)
       .skip(skip)
-      .populate('projectId')
+      .populate("projectId")
       .sort({ createdAt: -1 });
 
     const total = await Tree.countDocuments(filter);
@@ -38,16 +38,16 @@ export async function GET(request: NextRequest) {
           hasMore: skip + limit < total,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
-    console.error('GET /api/trees error:', error);
+    console.error("GET /api/trees error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to fetch trees',
+        error: "Failed to fetch trees",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       plantedAt: body.plantedAt,
       initialHeightCm: body.initialHeightCm,
       currentHeightCm: body.currentHeightCm,
-      status: 'DRAFT',
+      status: "DRAFT",
     });
 
     await tree.save();
@@ -77,16 +77,16 @@ export async function POST(request: NextRequest) {
         success: true,
         data: tree,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
-    console.error('POST /api/trees error:', error);
+    console.error("POST /api/trees error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to create tree',
+        error: "Failed to create tree",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
