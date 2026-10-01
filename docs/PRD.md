@@ -687,15 +687,18 @@ Use two concepts separately:
 
 ## Web Application Identity
 
-Supabase Auth.
+NextAuth (Auth.js v5), Credentials provider.
 
-Supported:
+Supported (MVP):
 
 - email/password
+
+Future (NextAuth supports both without changing the session model):
+
 - magic link
 - optional social login
 
-Supabase officially supports Next.js App Router authentication with cookie-based authentication. ([Supabase](https://supabase.com/docs/guides/auth/quickstarts/nextjs?utm_source=chatgpt.com))
+Session uses the JWT strategy — no separate sessions collection. The token carries the minimum needed to authorize requests: `id` and `role`. Passwords are hashed with bcrypt and stored on the `User` document with `select: false`, so they're never returned by a normal query.
 
 ## Blockchain Identity
 
@@ -704,14 +707,14 @@ Wallet address.
 Example:
 
 ```
-Supabase User
+User (MongoDB)
       │
-      └── wallet_address
+      └── Wallet.userId
              ↓
           0xABC...
 ```
 
-A user can have multiple wallets in the future.
+A user can have multiple wallets in the future — `Wallet` is a separate collection referencing `User`, not an embedded field.
 
 ---
 
@@ -971,13 +974,12 @@ Evidence types:
 
 ```
 INITIAL_PLANTING
-PERIODIC_MONITORING
+MONITORING
 HEALTH_CHECK
-GROWTH_MEASUREMENT
+GROWTH_CHECK
 GPS_CHECK
-REPLACEMENT
 DEATH_REPORT
-HARVEST
+REPLACEMENT
 ```
 
 Each evidence record:
@@ -1022,7 +1024,7 @@ evidenceCID
 evidenceHash
 ```
 
-## Supabase
+## MongoDB
 
 Simpan:
 
@@ -1114,7 +1116,7 @@ IPFS Pinning Service
  ▼
 CID
  │
- ├──────────→ Supabase
+ ├──────────→ MongoDB
  │
  └──────────→ Smart Contract
 ```
@@ -1215,7 +1217,7 @@ Compare Previous Evidence
       ↓
 Generate AI Result
       ↓
-Save Result in Supabase
+Save Result in MongoDB
       ↓
 Human Review
       ↓
@@ -1516,7 +1518,7 @@ Blockchain
     ↓
 Ownership / immutable state
 
-Supabase
+MongoDB
     ↓
 Application query / analytics
 
@@ -1527,36 +1529,37 @@ Evidence / metadata
 
 ---
 
-# 46. Supabase Database
+# 46. MongoDB Database
 
-Core tables:
+Core collections (Mongoose models, `models/*.ts`):
 
 ```
-profiles
-projects
-trees
-tree_evidence
-tree_measurements
-ai_analyses
-verifications
-tree_ownerships
-blockchain_transactions
-wallets
-notifications
+User
+Wallet
+Project
+Tree
+TreeEvidence
+AiAnalysis
+Verification
+BlockchainTransaction
+Notification
 ```
+
+MongoDB has no schema-enforced foreign keys — every `*Id` field below is an `ObjectId` reference (`ref: '<Model>'`) resolved at query time with `.populate()`, not a database-level constraint. Referential integrity is the application's responsibility.
 
 ---
 
-# 47. profiles
+# 47. User
 
 ```
-id UUID PK
-email
-full_name
-avatar_url
-role
-created_at
-updated_at
+_id ObjectId PK
+email           String, unique, lowercase
+password        String, select: false (bcrypt hash, never returned by default)
+fullName        String
+avatarUrl       String?
+role            String
+createdAt       Date
+updatedAt       Date
 ```
 
 Roles:
@@ -1568,34 +1571,36 @@ verifier
 admin
 ```
 
+Self-registration (`POST /api/auth/register`) always creates `role: sponsor`. Operator/verifier/admin accounts are provisioned separately — never selectable from a public form.
+
 ---
 
-# 48. wallets
+# 48. Wallet
 
 ```
-id UUID PK
-user_id UUID FK
-address TEXT
-chain_id BIGINT
-is_primary BOOLEAN
-verified_at TIMESTAMP
-created_at TIMESTAMP
+_id ObjectId PK
+userId        ObjectId FK → User
+address       String, lowercase
+chainId       Number
+isPrimary     Boolean
+verifiedAt    Date?
+createdAt     Date
 ```
 
 Constraint:
 
 ```
-unique(address, chain_id)
+unique(address, chainId)
 ```
 
 ---
 
-# 49. projects
+# 49. Project
 
 ```
-id UUID PK
+_id ObjectId PK
 name
-slug
+slug             unique, lowercase
 description
 country
 province
@@ -1603,54 +1608,54 @@ regency
 village
 latitude
 longitude
-area_hectares
-target_tree_count
+areaHectares
+targetTreeCount
 status
-cover_image_cid
-created_by
-created_at
-updated_at
+coverImageCid    String?
+createdBy        ObjectId FK → User
+createdAt
+updatedAt
 ```
 
 ---
 
-# 50. trees
+# 50. Tree
 
 ```
-id UUID PK
-project_id UUID FK
-tree_code
+_id ObjectId PK
+projectId          ObjectId FK → Project
+treeCode           String, unique
 species
 latitude
 longitude
-planted_at
-initial_height_cm
-current_height_cm
+plantedAt
+initialHeightCm
+currentHeightCm
 status
-token_id
-contract_address
-metadata_cid
-owner_wallet
-created_at
-updated_at
+tokenId            Number?
+contractAddress    String?
+metadataCid        String?
+ownerWallet        String?, lowercase
+createdAt
+updatedAt
 ```
 
 ---
 
-# 51. tree_evidence
+# 51. TreeEvidence
 
 ```
-id UUID PK
-tree_id UUID FK
+_id ObjectId PK
+treeId         ObjectId FK → Tree
 type
-image_cid
-metadata_cid
+imageCid
+metadataCid    String?
 latitude
 longitude
-captured_at
-submitted_by
+capturedAt
+submittedBy    ObjectId FK → User
 status
-created_at
+createdAt
 ```
 
 Types:
@@ -1660,56 +1665,66 @@ INITIAL_PLANTING
 MONITORING
 HEALTH_CHECK
 GROWTH_CHECK
+GPS_CHECK
 DEATH_REPORT
 REPLACEMENT
 ```
 
----
-
-# 52. ai_analyses
+Status:
 
 ```
-id UUID PK
-evidence_id UUID FK
-tree_detected
-tree_confidence
-health_score
-growth_score
-anomaly_risk
-disease_detected
-explanation
-model_name
-model_version
-created_at
+pending
+approved
+rejected
+```
+
+---
+
+# 52. AiAnalysis
+
+```
+_id ObjectId PK
+evidenceId        ObjectId FK → TreeEvidence
+treeDetected      Boolean
+treeConfidence    Number (0.00 - 1.00)
+healthScore       Number (0 - 100)
+growthScore       Number (0 - 100)
+anomalyRisk       String (LOW | MEDIUM | HIGH)
+diseaseDetected   Boolean
+explanation       String
+modelName         String
+modelVersion      String
+createdAt
 ```
 
 Always store:
 
 ```
-model_name
-model_version
+modelName
+modelVersion
 ```
 
 agar hasil AI dapat diaudit.
 
 ---
 
-# 53. verifications
+# 53. Verification
 
 ```
-id UUID PK
-tree_id UUID FK
-evidence_id UUID FK
-ai_analysis_id UUID FK
-verifier_id UUID FK
+_id ObjectId PK
+treeId               ObjectId FK → Tree
+evidenceId           ObjectId FK → TreeEvidence
+aiAnalysisId         ObjectId FK → AiAnalysis
+verifierId           ObjectId FK → User
 status
-verification_score
-decision
+verificationScore
+decision             String (approved | rejected)
 reason
-tx_hash
-block_number
-on_chain_timestamp
-created_at
+txHash               String?
+blockNumber          Number?
+onChainTimestamp     Date?
+createdAt
+updatedAt
 ```
 
 Status:
@@ -1723,27 +1738,66 @@ ON_CHAIN
 
 ---
 
-# 54. blockchain_transactions
+# 54. BlockchainTransaction
 
 ```
-id UUID PK
-tx_hash
-chain_id
-contract_address
-function_name
-from_address
-to_address
-block_number
-status
-gas_used
-created_at
+_id ObjectId PK
+txHash              String, unique, lowercase
+chainId
+contractAddress     String, lowercase
+functionName
+fromAddress         String, lowercase
+toAddress           String, lowercase
+blockNumber
+status              String (pending | success | failed)
+gasUsed
+createdAt
 ```
 
 ---
 
-# 55. Row Level Security
+## Notification
 
-Supabase RLS wajib digunakan.
+```
+_id ObjectId PK
+userId             ObjectId FK → User
+type
+title
+message
+treeId             ObjectId FK → Tree, optional
+verificationId     ObjectId FK → Verification, optional
+read               Boolean
+createdAt
+```
+
+Type (matches §71):
+
+```
+tree_sponsored
+verification_approved
+verification_rejected
+monitoring_update
+health_warning
+status_changed
+```
+
+---
+
+# 55. Authorization & Access Control
+
+MongoDB has no built-in row-level security — there is no database-enforced policy layer like Postgres RLS. Every check below must happen in the application layer: inside API Route Handlers / Server Actions, before any read or write touches Mongoose.
+
+Pattern per Next.js's own auth guide: read the NextAuth session, check `session.user.role`, then query. Never trust a client-supplied `userId` or `role` — always derive it from the verified session.
+
+```
+Request
+  ↓
+auth() → session (JWT, server-side only)
+  ↓
+session?.user.role check
+  ↓
+Mongoose query, scoped to session.user.id where ownership applies
+```
 
 Contoh:
 
@@ -1779,9 +1833,7 @@ approve/reject evidence
 
 ### Admin
 
-Full access melalui server-side privileged access.
-
-Supabase menyediakan PostgreSQL/RLS sebagai bagian dari pola user-management Next.js. ([Supabase](https://supabase.com/nextjs?utm_source=chatgpt.com))
+Full access melalui server-side privileged access — not a special database role, just `role === 'admin'` checked before the query runs.
 
 ---
 
@@ -1819,10 +1871,16 @@ viem
 Next.js Route Handlers / Server Actions
 ```
 
-## Database/Auth
+## Database
 
 ```
-Supabase
+MongoDB Atlas (Mongoose)
+```
+
+## Auth
+
+```
+NextAuth (Auth.js v5)
 ```
 
 ## Storage
@@ -1845,7 +1903,7 @@ Walaupun stack utama yang ditentukan adalah:
 
 ```
 Next.js
-Supabase
+MongoDB (Mongoose)
 Tailwind
 wagmi
 IPFS
@@ -1860,6 +1918,8 @@ viem
 Solidity
 OpenZeppelin
 Foundry
+NextAuth (Auth.js)
+bcryptjs
 Zod
 React Hook Form
 TanStack Query
@@ -1889,6 +1949,9 @@ src/
 │   ├── verifier/
 │   │   └── page.tsx
 │   └── api/
+│       ├── auth/
+│       │   ├── [...nextauth]/
+│       │   └── register/
 │       ├── ipfs/
 │       ├── ai/
 │       └── oracle/
@@ -1901,8 +1964,19 @@ src/
 │   ├── verification/
 │   └── dashboard/
 │
+├── models/
+│   ├── User.ts
+│   ├── Wallet.ts
+│   ├── Project.ts
+│   ├── Tree.ts
+│   ├── TreeEvidence.ts
+│   ├── AiAnalysis.ts
+│   ├── Verification.ts
+│   ├── BlockchainTransaction.ts
+│   └── Notification.ts
+│
 ├── lib/
-│   ├── supabase/
+│   ├── db/
 │   ├── web3/
 │   ├── ipfs/
 │   ├── ai/
@@ -1921,6 +1995,8 @@ src/
     ├── tree.ts
     ├── project.ts
     └── blockchain.ts
+
+auth.ts   ← Auth.js v5 config, project root (sibling of src/ or app/)
 ```
 
 ---
@@ -1930,8 +2006,9 @@ src/
 Example:
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+MONGODB_URI=
+
+AUTH_SECRET=
 
 NEXT_PUBLIC_CHAIN_ID=421614
 NEXT_PUBLIC_RPC_URL=
@@ -2021,7 +2098,7 @@ transaction hash
       ↓
 waitForTransactionReceipt()
       ↓
-update Supabase
+update MongoDB
 ```
 
 ---
@@ -2069,7 +2146,7 @@ VerificationRegistry
        ↓
 Blockchain event
        ↓
-Supabase index
+MongoDB index
 ```
 
 ---
@@ -2243,12 +2320,12 @@ missing project
 - replay protection
 - transaction monitoring
 
-## Supabase
+## MongoDB
 
-- RLS
-- service role only server-side
-- no service-role key in client
-- validate ownership
+- MONGODB_URI and AUTH_SECRET never exposed to the client (no `NEXT_PUBLIC_` prefix)
+- authorization enforced in API routes/Server Actions, not at the database layer (see §55 — MongoDB has no RLS)
+- passwords hashed with bcrypt; `password` field is `select: false` by default
+- validate ownership before any write
 
 ## IPFS
 
@@ -2583,7 +2660,7 @@ Minimum screens:
 
 ### Authentication
 
-- Supabase Auth
+- NextAuth (Credentials provider)
 - wallet connection
 
 ### RWA
@@ -2965,7 +3042,9 @@ transaction failed
 transaction success
 IPFS upload failure
 AI failure
-Supabase failure
+MongoDB failure
+invalid credentials (login)
+duplicate email (register)
 ```
 
 ---
@@ -3157,7 +3236,8 @@ Number of projects
 
 ```
 Next.js
-Supabase
+MongoDB (Mongoose)
+NextAuth
 Tailwind
 wagmi
 viem
@@ -3172,7 +3252,9 @@ Running web app
 +
 Wallet connection
 +
-Supabase connection
+MongoDB connection
++
+Login / Create Account
 ```
 
 ---
@@ -3303,7 +3385,7 @@ Approved verification
 Combine:
 
 ```
-Supabase
+MongoDB
 +
 IPFS
 +
@@ -3411,7 +3493,7 @@ TreeBond MVP dianggap selesai jika:
 The project should follow this rule:
 
 ```
-                 SUPABASE
+                 MONGODB
               Application DB
                     │
           ┌─────────┴─────────┐
@@ -3445,19 +3527,20 @@ The project should follow this rule:
 
 | Data | Primary Source |
 | --- | --- |
-| User profile | Supabase |
-| Application data | Supabase |
-| Tree metadata | Supabase + IPFS |
+| User profile | MongoDB |
+| Application data | MongoDB |
+| Tree metadata | MongoDB + IPFS |
 | Tree image | IPFS |
 | NFT metadata | IPFS |
 | Ownership | Blockchain |
 | Sponsorship | Blockchain |
-| Verification record | Blockchain + Supabase |
-| AI result | Supabase |
+| Verification record | Blockchain + MongoDB |
+| AI result | MongoDB |
 | Evidence | IPFS |
 | Evidence integrity | CID/hash |
 | Transaction | Blockchain |
-| Analytics | Supabase |
+| Analytics | MongoDB |
+| Session / auth | NextAuth (JWT, stateless) |
 
 ---
 
@@ -3486,7 +3569,7 @@ Oracle
       ↓
 Blockchain
       ↓
-Supabase Index
+MongoDB Index
       ↓
 Frontend
 ```
@@ -3617,7 +3700,9 @@ Itulah loop utama yang harus selalu menjadi pusat pengembangan TreeBond AI.
 
 ### Catatan implementasi penting
 
-Untuk stack yang kamu pilih, saya akan menjadikan **Arbitrum Sepolia + Solidity/OpenZeppelin + Foundry + wagmi/viem** sebagai blockchain layer, sedangkan **Supabase sebagai application database**, bukan sebagai pengganti blockchain. IPFS digunakan untuk evidence dan metadata; data penting perlu dipin karena IPFS sendiri tidak menjamin persistence hanya karena sebuah CID sudah ada. ([IPFS Docs](https://docs.ipfs.tech/quickstart/pin/?utm_source=chatgpt.com))
+Untuk stack yang kamu pilih, saya akan menjadikan **Arbitrum Sepolia + Solidity/OpenZeppelin + Foundry + wagmi/viem** sebagai blockchain layer, sedangkan **MongoDB (Mongoose) sebagai application database dan NextAuth (Auth.js v5) untuk authentication**, bukan sebagai pengganti blockchain. IPFS digunakan untuk evidence dan metadata; data penting perlu dipin karena IPFS sendiri tidak menjamin persistence hanya karena sebuah CID sudah ada. ([IPFS Docs](https://docs.ipfs.tech/quickstart/pin/?utm_source=chatgpt.com))
+
+MongoDB tidak punya Row Level Security seperti Postgres/Supabase — setiap authorization check (role, ownership) harus dilakukan secara eksplisit di API route/Server Action sebelum query dijalankan (lihat §55).
 
 Untuk **MVP hackathon**, saya juga sangat menyarankan jangan langsung mengimplementasikan carbon credit atau financial yield. Bangun dulu satu loop yang benar-benar solid:
 
