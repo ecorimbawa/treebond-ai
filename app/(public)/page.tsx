@@ -1089,11 +1089,15 @@ export default function Home() {
       <footer className="bg-[#122e20] px-5 py-14 text-[#c8d7cc]">
         <div className="mx-auto grid max-w-[1280px] gap-10 sm:grid-cols-2 lg:grid-cols-6 lg:px-3">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 text-lg font-extrabold tracking-[-.06em] text-white">
-              <span className="grid size-7 place-items-center rounded-lg bg-[#246B45]">
-                <Sprout size={16} aria-hidden="true" />
-              </span>{" "}
-              TreeBond AI
+            <div className="flex items-center gap-2">
+              <Image
+                src="/Gemini_Generated_Image_d2an70d2an70d2an-removebg-preview.png"
+                alt="TreeBond AI"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+              />
+              <span className="text-lg font-extrabold tracking-[-.06em] text-white">TreeBond AI</span>
             </div>
             <p className="mt-3 text-sm">Verified Trees. On-chain Proof.</p>
           </div>
