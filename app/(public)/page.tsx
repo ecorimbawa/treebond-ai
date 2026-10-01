@@ -147,45 +147,15 @@ function StatusPill({
 }
 function TreePassportCard() {
   return (
-    <article className="w-full rounded-2xl border border-[#e2e7e2] bg-white p-5 shadow-[0_20px_50px_rgba(22,61,42,.1)] sm:p-7">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-extrabold tracking-[0.12em] text-[#667069]">
-          TREE RWA #192
-        </p>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DDEEE3] px-2.5 py-1 text-[10px] font-extrabold text-[#246B45]">
-          <BadgeCheck size={13} aria-hidden="true" /> VERIFIED
-        </span>
-      </div>
-      <h3 className="mt-6 text-3xl font-extrabold tracking-[-0.05em]">
-        Sengon
-      </h3>
-      <p className="mt-1 text-sm font-semibold text-[#667069]">Central Java</p>
-      <div className="mt-6 rounded-xl bg-[#F3F5F1] p-4">
-        <p className="text-xs font-semibold text-[#667069]">Health Score</p>
-        <p className="mt-1 text-3xl font-extrabold tracking-[-0.05em]">
-          94 <span className="text-base">/ 100</span>
-        </p>
-      </div>
-      <div className="my-5 border-t border-[#e2e7e2]" />
-      <dl className="grid gap-3 text-sm">
-        <DataRow label="Tree ID" value="TREE-JTG-000192" mono />
-        <DataRow label="Planted" value="01 Sep 2026" />
-        <DataRow label="Sponsor" value="0x71...92A" mono />
-        <DataRow label="Verifier" value="0x42B...991" mono />
-        <DataRow label="Field Evidence" value="Available ↗" accent />
-      </dl>
-      <div className="my-5 border-t border-[#e2e7e2]" />
-      <dl className="grid gap-3 text-sm">
-        <DataRow label="Network" value="Arbitrum Sepolia" />
-        <DataRow label="Contract" value="0x9F1...204" mono />
-        <DataRow label="Token ID" value="192" mono />
-      </dl>
-      <a
-        href="/trees/192"
-        className="mt-6 flex min-h-11 items-center justify-between rounded-xl bg-[#163D2A] px-4 text-sm font-bold text-white transition hover:bg-[#246B45]"
-      >
-        View Tree Passport <ArrowUpRight size={16} aria-hidden="true" />
-      </a>
+    <article className="w-full rounded-2xl border border-[#e2e7e2] bg-white overflow-hidden shadow-[0_20px_50px_rgba(22,61,42,.1)]">
+      <Image
+        src="/Gemini_Generated_Image_o5gebno5gebno5ge-removebg-preview.png"
+        alt="Tree RWA #192"
+        width={500}
+        height={500}
+        priority
+        className="w-full h-auto"
+      />
     </article>
   );
 }
