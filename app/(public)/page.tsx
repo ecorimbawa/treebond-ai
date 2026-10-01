@@ -371,12 +371,12 @@ const process = [
   ],
 ] as const;
 const timeline = [
-  [MapPin, "Tree Registered", "Wonosobo, Central Java"],
-  [Sprout, "Sengon Planted", "01 Sep 2026"],
-  [Check, "Initial Photo Verified", "GPS matched"],
-  [ClipboardList, "Growth Monitoring Logged", "5 records"],
-  [Cpu, "AI Health Check", "Score 94/100"],
-  [Blocks, "Tree RWA Minted", "Arbitrum Sepolia"],
+  ["/01-removebg-preview.png", "Tree Registered", "Wonosobo, Central Java"],
+  ["/02-removebg-preview.png", "Sengon Planted", "01 Sep 2026"],
+  ["/03-removebg-preview.png", "Initial Photo Verified", "GPS matched"],
+  ["/04-removebg-preview.png", "Growth Monitoring Logged", "5 records"],
+  ["/05-removebg-preview.png", "AI Health Check", "Score 94/100"],
+  ["/01-removebg-preview.png", "Tree RWA Minted", "Arbitrum Sepolia"],
 ] as const;
 const faqs = [
   [
@@ -945,10 +945,16 @@ export default function Home() {
           </div>
           <div className="lg:col-span-6 lg:col-start-7">
             <ol className="rounded-2xl border border-[#e2e7e2] bg-white p-6 sm:p-8">
-              {timeline.map(([Icon, title, detail], i) => (
+              {timeline.map(([imageSrc, title, detail], i) => (
                 <li key={title} className="relative flex gap-4 pb-7 last:pb-0">
-                  <span className="relative z-10 grid size-10 shrink-0 place-items-center rounded-full bg-[#DDEEE3] text-[#246B45]">
-                    <Icon size={18} aria-hidden="true" />
+                  <span className="relative z-10 grid size-10 shrink-0 place-items-center rounded-full">
+                    <Image
+                      src={imageSrc as string}
+                      alt={title}
+                      width={40}
+                      height={40}
+                      className="size-10"
+                    />
                   </span>
                   {i < timeline.length - 1 && (
                     <span className="absolute left-5 top-10 h-[calc(100%-20px)] border-l border-dashed border-[#bfd0c2]" />
