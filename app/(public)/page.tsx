@@ -995,35 +995,39 @@ export default function Home() {
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             [
-              Handshake,
+              "/Gemini_Generated_Image_5vbwwm5vbwwm5vbw-removebg-preview.png",
               "Sponsors",
               "Sponsor a real tree, track its growth, and hold a digital record you can actually check — not just a certificate you have to trust.",
             ],
             [
-              ClipboardList,
+              "/Gemini_Generated_Image_27s70u27s70u27s7-removebg-preview.png",
               "Operators",
               "Register projects and trees, upload monitoring evidence, and build a verifiable history for every hectare you manage.",
             ],
             [
-              BadgeCheck,
+              "/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png",
               "Verifiers",
               "Review AI analysis against field evidence and approve or reject verification before anything reaches the blockchain.",
             ],
             [
-              Landmark,
+              "/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png",
               "Admins",
               "Oversee projects, operators, and verifiers, and step in when a dispute needs a human decision.",
             ],
-          ].map(([Icon, title, text]) => {
-            const IconComponent = Icon as typeof Handshake;
+          ].map(([imageSrc, title, text]) => {
             return (
               <article
                 key={title as string}
                 className="rounded-2xl border border-[#e2e7e2] bg-white p-6"
               >
-                <span className="grid size-11 place-items-center rounded-xl bg-[#DDEEE3] text-[#246B45]">
-                  <IconComponent size={21} aria-hidden="true" />
-                </span>
+                <Image
+                  src={imageSrc as string}
+                  alt={title as string}
+                  width={44}
+                  height={44}
+                  className="size-11"
+                />
+
                 <h3 className="mt-5 text-xl font-extrabold">
                   {title as string}
                 </h3>
