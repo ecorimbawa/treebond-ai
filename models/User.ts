@@ -1,38 +1,42 @@
-import { type Document, model, models, Schema } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
+
+export type UserRole = 'sponsor' | 'operator' | 'verifier' | 'admin';
 
 export interface IUser extends Document {
-  name: string;
   email: string;
-  role: "FARMER" | "VERIFIER" | "BUYER" | "ADMIN";
-  walletAddress?: string;
+  fullName: string;
+  avatarUrl?: string;
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const userSchema = new Schema<IUser>(
   {
-    name: { type: String, required: true, trim: true },
     email: {
       type: String,
       required: true,
       unique: true,
-      trim: true,
       lowercase: true,
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      required: true,
+    },
+    avatarUrl: {
+      type: String,
+      default: null,
     },
     role: {
       type: String,
-      enum: ["FARMER", "VERIFIER", "BUYER", "ADMIN"],
-      required: true,
-    },
-    walletAddress: {
-      type: String,
-      trim: true,
-      lowercase: true,
-      unique: true,
-      sparse: true,
+      enum: ['sponsor', 'operator', 'verifier', 'admin'],
+      default: 'sponsor',
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  }
 );
 
-export default models.User || model<IUser>("User", userSchema);
+export const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
