@@ -1081,11 +1081,11 @@ export default function Home() {
                   <Image
                     src={imageSrc as string}
                     alt={title as string}
-                    width={64}
-                    height={64}
-                    className="size-16"
+                    width={96}
+                    height={96}
+                    className="size-24"
                   />
-                  <h3 className="mt-5 text-xl font-extrabold">
+                  <h3 className="mt-8 text-xl font-extrabold">
                     {title as string}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-[#667069]">
