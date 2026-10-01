@@ -139,20 +139,6 @@ function StatusPill({
     </span>
   );
 }
-function TreePassportCard() {
-  return (
-    <article className="w-full">
-      <Image
-        src="/Gemini_Generated_Image_o5gebno5gebno5ge-removebg-preview.png"
-        alt="Tree RWA #192"
-        width={500}
-        height={500}
-        priority
-        className="w-full h-auto"
-      />
-    </article>
-  );
-}
 function TreePassportDetail() {
   return (
     <article className="w-full rounded-2xl border border-white/20 bg-white p-5 text-[#18201B] shadow-[0_20px_50px_rgba(22,61,42,.1)] sm:p-7">
@@ -479,34 +465,45 @@ export default function Home() {
           </nav>
         )}
       </header>
-      <section className="relative mx-auto grid max-w-[1280px] gap-12 px-5 pb-24 pt-36 sm:pt-44 lg:grid-cols-12 lg:items-center lg:px-8 lg:pb-36">
-        <div className="lg:col-span-7">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#cfe2d4] bg-[#eff7f1] px-3 py-1.5 text-xs font-bold text-[#246B45]">
-            <Blocks size={14} aria-hidden="true" /> Arbitrum Sepolia Testnet
+      <section className="relative mx-auto flex min-h-[100dvh] max-w-[1280px] flex-col px-5 pb-10 pt-36 sm:pt-44 lg:px-8">
+        <div className="flex flex-1 flex-col gap-10 lg:flex-row lg:gap-8">
+          <div className="lg:basis-5/12 lg:self-start">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#cfe2d4] bg-[#eff7f1] px-3 py-1.5 text-xs font-bold text-[#246B45]">
+              <Blocks size={14} aria-hidden="true" /> Arbitrum Sepolia Testnet
+            </div>
+            <h1 className="mt-6 text-balance text-5xl font-extrabold leading-[.98] tracking-[-.065em] text-[#163D2A] sm:text-6xl">
+              Making Living Assets Verifiable On-Chain.
+            </h1>
           </div>
-          <h1 className="mt-6 max-w-3xl text-balance text-5xl font-extrabold leading-[.98] tracking-[-.065em] text-[#163D2A] sm:text-6xl lg:text-7xl">
-            Making Living Assets Verifiable On-Chain.
-          </h1>
-          <p className="mt-6 max-w-xl text-pretty text-lg leading-8 text-[#667069]">
-            TreeBond AI turns real trees into continuously monitored,
-            independently verified digital assets — connecting sponsors, field
-            operators, and verifiers around one living record of proof.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button href="/explore">Explore Trees</Button>
-            <Button secondary href="/operator/projects">
-              Register Project
-            </Button>
+          <div className="relative mx-auto self-end lg:basis-3/12 lg:self-end">
+            <div className="absolute inset-0 -z-10 rounded-full bg-[#DDEEE3] blur-3xl" />
+            <Image
+              src="/tree-hero.png"
+              alt="TreeBond AI tree illustration"
+              width={231}
+              height={449}
+              priority
+              className="mx-auto h-auto w-[150px] sm:w-[175px] lg:w-[230px]"
+            />
           </div>
-          <p className="mt-9 text-xs font-bold tracking-wide text-[#667069]">
-            Field Evidence <span className="mx-2 text-[#B7791F]">·</span> AI
-            Verification <span className="mx-2 text-[#B7791F]">·</span> On-chain
-            Proof
-          </p>
-        </div>
-        <div className="relative lg:col-span-5">
-          <div className="absolute -inset-8 -z-10 rounded-full bg-[#DDEEE3] blur-3xl" />
-          <TreePassportCard />
+          <div className="lg:basis-4/12 lg:self-end">
+            <p className="text-pretty text-lg leading-8 text-[#667069]">
+              TreeBond AI turns real trees into continuously monitored,
+              independently verified digital assets — connecting sponsors, field
+              operators, and verifiers around one living record of proof.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button href="/explore">Explore Trees</Button>
+              <Button secondary href="/operator/projects">
+                Register Project
+              </Button>
+            </div>
+            <p className="mt-9 text-xs font-bold tracking-wide text-[#667069]">
+              Field Evidence <span className="mx-2 text-[#B7791F]">·</span> AI
+              Verification <span className="mx-2 text-[#B7791F]">·</span>{" "}
+              On-chain Proof
+            </p>
+          </div>
         </div>
       </section>
       <section
