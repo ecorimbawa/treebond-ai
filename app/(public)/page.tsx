@@ -607,33 +607,33 @@ export default function Home() {
                   <Image
                     src="/Gemini_Generated_Image_27s70u27s70u27s7-removebg-preview.png"
                     alt={title}
-                    width={44}
-                    height={44}
-                    className="size-11"
+                    width={64}
+                    height={64}
+                    className="size-16"
                   />
                 ) : number === "02" ? (
                   <Image
                     src="/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png"
                     alt={title}
-                    width={44}
-                    height={44}
-                    className="size-11"
+                    width={64}
+                    height={64}
+                    className="size-16"
                   />
                 ) : number === "03" ? (
                   <Image
                     src="/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png"
                     alt={title}
-                    width={44}
-                    height={44}
-                    className="size-11"
+                    width={64}
+                    height={64}
+                    className="size-16"
                   />
                 ) : number === "04" ? (
                   <Image
                     src="/Gemini_Generated_Image_5vbwwm5vbwwm5vbw-removebg-preview.png"
                     alt={title}
-                    width={44}
-                    height={44}
-                    className="size-11"
+                    width={64}
+                    height={64}
+                    className="size-16"
                   />
                 ) : (
                   <span className="grid size-11 place-items-center rounded-xl bg-[#DDEEE3] text-[#246B45]">
