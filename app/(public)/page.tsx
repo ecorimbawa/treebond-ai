@@ -474,6 +474,10 @@ export default function Home() {
             <h1 className="mt-6 text-balance text-5xl font-extrabold leading-[.98] tracking-[-.065em] text-[#163D2A] sm:text-6xl">
               Making Living Assets Verifiable On-Chain.
             </h1>
+            <p className="mt-5 max-w-sm text-pretty text-base leading-7 text-[#667069]">
+              Every tree gets a verifiable digital identity — tracked from the
+              ground, confirmed by AI, and recorded on-chain for good.
+            </p>
           </div>
           <div className="relative mx-auto self-end lg:basis-3/12 lg:self-end">
             <div className="absolute inset-0 -z-10 rounded-full bg-[#DDEEE3] blur-3xl" />
