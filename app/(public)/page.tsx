@@ -147,7 +147,7 @@ function StatusPill({
 }
 function TreePassportCard() {
   return (
-    <article className="w-full rounded-2xl border border-[#e2e7e2] bg-white overflow-hidden shadow-[0_20px_50px_rgba(22,61,42,.1)]">
+    <article className="w-full">
       <Image
         src="/Gemini_Generated_Image_o5gebno5gebno5ge-removebg-preview.png"
         alt="Tree RWA #192"
