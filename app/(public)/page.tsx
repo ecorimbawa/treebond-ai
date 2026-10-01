@@ -611,6 +611,14 @@ export default function Home() {
                     height={44}
                     className="size-11"
                   />
+                ) : number === "02" ? (
+                  <Image
+                    src="/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png"
+                    alt={title}
+                    width={44}
+                    height={44}
+                    className="size-11"
+                  />
                 ) : (
                   <span className="grid size-11 place-items-center rounded-xl bg-[#DDEEE3] text-[#246B45]">
                     <Icon size={21} aria-hidden="true" />
