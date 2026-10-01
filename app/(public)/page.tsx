@@ -251,7 +251,7 @@ function FlowItem({
   return (
     <div className="flex items-center gap-4 rounded-xl p-4">
       <span
-        className={`grid size-11 shrink-0 place-items-center rounded-xl ${blue ? "bg-[#e7ebfc] text-[#3154D5]" : "bg-[#DDEEE3] text-[#246B45]"}`}
+        className={`grid size-16 shrink-0 place-items-center rounded-xl ${blue ? "text-[#3154D5]" : "text-[#246B45]"}`}
       >
         {icon}
       </span>
@@ -834,9 +834,9 @@ export default function Home() {
                 <Image
                   src="/Gemini_Generated_Image_27s70u27s70u27s7-removebg-preview.png"
                   alt="Physical World"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8"
+                  width={56}
+                  height={56}
+                  className="h-14 w-14"
                 />
               }
             />
@@ -849,9 +849,9 @@ export default function Home() {
                 <Image
                   src="/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png"
                   alt="Verification"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8"
+                  width={56}
+                  height={56}
+                  className="h-14 w-14"
                 />
               }
             />
@@ -864,9 +864,9 @@ export default function Home() {
                 <Image
                   src="/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png"
                   alt="Blockchain"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8"
+                  width={56}
+                  height={56}
+                  className="h-14 w-14"
                 />
               }
               blue
