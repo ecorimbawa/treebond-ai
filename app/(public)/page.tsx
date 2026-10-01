@@ -1052,31 +1052,32 @@ export default function Home() {
           <div className="mt-14 grid gap-4 md:grid-cols-3">
             {[
               [
-                Route,
+                "/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png",
                 "Traceable",
                 "Every evidence upload and verification on a Tree RWA is recorded on-chain and open to independent inspection — not locked in a private database.",
               ],
               [
-                ShieldCheck,
+                "/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png",
                 "Verifiable",
                 "No tree is tokenized without first passing through AI analysis and human verification. Claims are checked before they're recorded, not after.",
               ],
               [
-                Gauge,
+                "/Gemini_Generated_Image_5vbwwm5vbwwm5vbw-removebg-preview.png",
                 "Efficient",
                 "TreeBond AI runs on Arbitrum, keeping on-chain verification fast and inexpensive enough for frequent, real monitoring cycles — not just one-time minting.",
               ],
-            ].map(([Icon, title, text]) => {
-              const IconComponent = Icon as typeof Route;
+            ].map(([imageSrc, title, text]) => {
               return (
                 <article
                   key={title as string}
                   className="rounded-2xl border border-[#e2e7e2] p-6"
                 >
-                  <IconComponent
-                    className="text-[#246B45]"
-                    size={25}
-                    aria-hidden="true"
+                  <Image
+                    src={imageSrc as string}
+                    alt={title as string}
+                    width={44}
+                    height={44}
+                    className="size-11"
                   />
                   <h3 className="mt-5 text-xl font-extrabold">
                     {title as string}
