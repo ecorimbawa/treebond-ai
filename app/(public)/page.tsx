@@ -424,7 +424,7 @@ export default function Home() {
   return (
     <main id="top" className="overflow-x-clip bg-[#FAFAF7] text-[#18201B]">
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all ${scrolled ? "border-b border-[#e2e7e2] bg-white/90 backdrop-blur" : "bg-[#FAFAF7]/80"}`}
+        className={`fixed inset-x-0 top-0 z-50 transition-all ${scrolled ? "bg-white/90 backdrop-blur" : "bg-[#FAFAF7]/80"}`}
       >
         <div className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between px-5 lg:px-8">
           <Logo />
