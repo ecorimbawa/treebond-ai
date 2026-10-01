@@ -1,7 +1,6 @@
 // @/app/page.tsx
 "use client";
 
-import Image from "next/image";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -9,20 +8,15 @@ import {
   Blocks,
   Check,
   ChevronDown,
-  ClipboardList,
   Cpu,
   Gauge,
-  Handshake,
-  Landmark,
-  MapPin,
   Menu,
   RefreshCw,
-  Route,
-  ShieldCheck,
   Sprout,
   Users,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import { type ReactNode, useEffect, useState } from "react";
 
 const mono = "font-[family-name:var(--font-geist-mono)]";
@@ -597,7 +591,7 @@ export default function Home() {
           centered
         />
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {process.map(([Icon, number, label, title, text, data]) => (
+          {process.map(([, number, label, title, text, data]) => (
             <article
               key={number}
               className="group rounded-2xl border border-[#e2e7e2] bg-white p-6 transition hover:-translate-y-0.5 hover:border-[#9ec6aa]"
@@ -627,7 +621,7 @@ export default function Home() {
                     height={128}
                     className="size-32"
                   />
-                ) : number === "04" ? (
+                ) : (
                   <Image
                     src="/04-removebg-preview.png"
                     alt={title}
@@ -635,10 +629,6 @@ export default function Home() {
                     height={128}
                     className="size-32"
                   />
-                ) : (
-                  <span className="grid size-11 place-items-center rounded-xl bg-[#DDEEE3] text-[#246B45]">
-                    <Icon size={21} aria-hidden="true" />
-                  </span>
                 )}
                 <span className={`${mono} text-xs text-[#929A94]`}>
                   {number}
@@ -1172,7 +1162,9 @@ export default function Home() {
                 height={48}
                 className="h-12 w-12"
               />
-              <span className="text-lg font-extrabold tracking-[-.06em] text-white">TreeBond AI</span>
+              <span className="text-lg font-extrabold tracking-[-.06em] text-white">
+                TreeBond AI
+              </span>
             </div>
             <p className="mt-3 text-sm">Verified Trees. On-chain Proof.</p>
           </div>
