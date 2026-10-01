@@ -43,10 +43,10 @@ function Logo() {
       <Image
         src="/Gemini_Generated_Image_d2an70d2an70d2an-removebg-preview.png"
         alt="TreeBond AI logo"
-        width={28}
-        height={28}
+        width={44}
+        height={44}
         priority
-        className="h-7 w-7"
+        className="h-11 w-11"
       />
       TreeBond
       <span className="rounded-full bg-[#DDEEE3] px-2 py-0.5 text-[10px] font-extrabold tracking-[.08em] text-[#246B45]">
