@@ -605,7 +605,7 @@ export default function Home() {
               <div className="flex items-start justify-between">
                 {number === "01" ? (
                   <Image
-                    src="/Gemini_Generated_Image_27s70u27s70u27s7-removebg-preview.png"
+                    src="/01-removebg-preview.png"
                     alt={title}
                     width={96}
                     height={96}
@@ -613,7 +613,7 @@ export default function Home() {
                   />
                 ) : number === "02" ? (
                   <Image
-                    src="/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png"
+                    src="/02-removebg-preview.png"
                     alt={title}
                     width={96}
                     height={96}
@@ -621,7 +621,7 @@ export default function Home() {
                   />
                 ) : number === "03" ? (
                   <Image
-                    src="/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png"
+                    src="/03-removebg-preview.png"
                     alt={title}
                     width={96}
                     height={96}
@@ -629,7 +629,7 @@ export default function Home() {
                   />
                 ) : number === "04" ? (
                   <Image
-                    src="/Gemini_Generated_Image_5vbwwm5vbwwm5vbw-removebg-preview.png"
+                    src="/04-removebg-preview.png"
                     alt={title}
                     width={96}
                     height={96}
@@ -832,7 +832,7 @@ export default function Home() {
               sub="Planted 01 Sep 2026 · TREE-JTG-000192"
               icon={
                 <Image
-                  src="/Gemini_Generated_Image_27s70u27s70u27s7-removebg-preview.png"
+                  src="/01-removebg-preview.png"
                   alt="Physical World"
                   width={56}
                   height={56}
@@ -847,7 +847,7 @@ export default function Home() {
               sub="Reviewed by an independent verifier"
               icon={
                 <Image
-                  src="/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png"
+                  src="/02-removebg-preview.png"
                   alt="Verification"
                   width={56}
                   height={56}
@@ -862,7 +862,7 @@ export default function Home() {
               sub="1 token · Arbitrum Sepolia"
               icon={
                 <Image
-                  src="/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png"
+                  src="/03-removebg-preview.png"
                   alt="Blockchain"
                   width={56}
                   height={56}
@@ -995,22 +995,22 @@ export default function Home() {
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             [
-              "/Gemini_Generated_Image_5vbwwm5vbwwm5vbw-removebg-preview.png",
+              "/Sponsors.png",
               "Sponsors",
               "Sponsor a real tree, track its growth, and hold a digital record you can actually check — not just a certificate you have to trust.",
             ],
             [
-              "/Gemini_Generated_Image_27s70u27s70u27s7-removebg-preview.png",
+              "/Operators.png",
               "Operators",
               "Register projects and trees, upload monitoring evidence, and build a verifiable history for every hectare you manage.",
             ],
             [
-              "/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png",
+              "/Verifiers.png",
               "Verifiers",
               "Review AI analysis against field evidence and approve or reject verification before anything reaches the blockchain.",
             ],
             [
-              "/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png",
+              "/Admins.png",
               "Admins",
               "Oversee projects, operators, and verifiers, and step in when a dispute needs a human decision.",
             ],
@@ -1052,17 +1052,17 @@ export default function Home() {
           <div className="mt-14 grid gap-4 md:grid-cols-3">
             {[
               [
-                "/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png",
+                "/Traceable.png",
                 "Traceable",
                 "Every evidence upload and verification on a Tree RWA is recorded on-chain and open to independent inspection — not locked in a private database.",
               ],
               [
-                "/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png",
+                "/Verifiable.png",
                 "Verifiable",
                 "No tree is tokenized without first passing through AI analysis and human verification. Claims are checked before they're recorded, not after.",
               ],
               [
-                "/Gemini_Generated_Image_5vbwwm5vbwwm5vbw-removebg-preview.png",
+                "/Efficient.png",
                 "Efficient",
                 "TreeBond AI runs on Arbitrum, keeping on-chain verification fast and inexpensive enough for frequent, real monitoring cycles — not just one-time minting.",
               ],
