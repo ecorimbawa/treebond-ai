@@ -1,9 +1,10 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { type Document, Schema } from "mongoose";
 
-export type UserRole = 'sponsor' | 'operator' | 'verifier' | 'admin';
+export type UserRole = "sponsor" | "operator" | "verifier" | "admin";
 
 export interface IUser extends Document {
   email: string;
+  password: string;
   fullName: string;
   avatarUrl?: string;
   role: UserRole;
@@ -20,6 +21,11 @@ const userSchema = new Schema<IUser>(
       lowercase: true,
       trim: true,
     },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
     fullName: {
       type: String,
       required: true,
@@ -30,13 +36,14 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['sponsor', 'operator', 'verifier', 'admin'],
-      default: 'sponsor',
+      enum: ["sponsor", "operator", "verifier", "admin"],
+      default: "sponsor",
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+export const User =
+  mongoose.models.User || mongoose.model<IUser>("User", userSchema);
