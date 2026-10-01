@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { type Document, Schema } from "mongoose";
 
 export interface IBlockchainTransaction extends Document {
   txHash: string;
@@ -8,7 +8,7 @@ export interface IBlockchainTransaction extends Document {
   fromAddress: string;
   toAddress: string;
   blockNumber: number;
-  status: 'pending' | 'success' | 'failed';
+  status: "pending" | "success" | "failed";
   gasUsed: string;
   createdAt: Date;
 }
@@ -50,8 +50,8 @@ const blockchainTransactionSchema = new Schema<IBlockchainTransaction>(
     },
     status: {
       type: String,
-      enum: ['pending', 'success', 'failed'],
-      default: 'pending',
+      enum: ["pending", "success", "failed"],
+      default: "pending",
     },
     gasUsed: {
       type: String,
@@ -60,9 +60,12 @@ const blockchainTransactionSchema = new Schema<IBlockchainTransaction>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const BlockchainTransaction =
   mongoose.models.BlockchainTransaction ||
-  mongoose.model<IBlockchainTransaction>('BlockchainTransaction', blockchainTransactionSchema);
+  mongoose.model<IBlockchainTransaction>(
+    "BlockchainTransaction",
+    blockchainTransactionSchema,
+  );

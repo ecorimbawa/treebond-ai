@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { type Document, Schema, type Types } from "mongoose";
 
 export interface IProject extends Document {
   name: string;
@@ -12,7 +12,7 @@ export interface IProject extends Document {
   longitude: number;
   areaHectares: number;
   targetTreeCount: number;
-  status: 'active' | 'paused' | 'completed' | 'archived';
+  status: "active" | "paused" | "completed" | "archived";
   coverImageCid?: string;
   createdBy: Types.ObjectId;
   createdAt: Date;
@@ -69,8 +69,8 @@ const projectSchema = new Schema<IProject>(
     },
     status: {
       type: String,
-      enum: ['active', 'paused', 'completed', 'archived'],
-      default: 'active',
+      enum: ["active", "paused", "completed", "archived"],
+      default: "active",
     },
     coverImageCid: {
       type: String,
@@ -78,13 +78,14 @@ const projectSchema = new Schema<IProject>(
     },
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const Project = mongoose.models.Project || mongoose.model<IProject>('Project', projectSchema);
+export const Project =
+  mongoose.models.Project || mongoose.model<IProject>("Project", projectSchema);

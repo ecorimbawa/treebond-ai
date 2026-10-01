@@ -1,13 +1,13 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { type Document, Schema, type Types } from "mongoose";
 
 export type EvidenceType =
-  | 'INITIAL_PLANTING'
-  | 'MONITORING'
-  | 'HEALTH_CHECK'
-  | 'GROWTH_CHECK'
-  | 'DEATH_REPORT'
-  | 'REPLACEMENT'
-  | 'GPS_CHECK';
+  | "INITIAL_PLANTING"
+  | "MONITORING"
+  | "HEALTH_CHECK"
+  | "GROWTH_CHECK"
+  | "DEATH_REPORT"
+  | "REPLACEMENT"
+  | "GPS_CHECK";
 
 export interface ITreeEvidence extends Document {
   treeId: Types.ObjectId;
@@ -18,7 +18,7 @@ export interface ITreeEvidence extends Document {
   longitude: number;
   capturedAt: Date;
   submittedBy: Types.ObjectId;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   createdAt: Date;
 }
 
@@ -26,19 +26,19 @@ const treeEvidenceSchema = new Schema<ITreeEvidence>(
   {
     treeId: {
       type: Schema.Types.ObjectId,
-      ref: 'Tree',
+      ref: "Tree",
       required: true,
     },
     type: {
       type: String,
       enum: [
-        'INITIAL_PLANTING',
-        'MONITORING',
-        'HEALTH_CHECK',
-        'GROWTH_CHECK',
-        'DEATH_REPORT',
-        'REPLACEMENT',
-        'GPS_CHECK',
+        "INITIAL_PLANTING",
+        "MONITORING",
+        "HEALTH_CHECK",
+        "GROWTH_CHECK",
+        "DEATH_REPORT",
+        "REPLACEMENT",
+        "GPS_CHECK",
       ],
       required: true,
     },
@@ -64,19 +64,20 @@ const treeEvidenceSchema = new Schema<ITreeEvidence>(
     },
     submittedBy: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected'],
-      default: 'pending',
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const TreeEvidence =
-  mongoose.models.TreeEvidence || mongoose.model<ITreeEvidence>('TreeEvidence', treeEvidenceSchema);
+  mongoose.models.TreeEvidence ||
+  mongoose.model<ITreeEvidence>("TreeEvidence", treeEvidenceSchema);

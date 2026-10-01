@@ -1,19 +1,19 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { type Document, Schema, type Types } from "mongoose";
 
 export type TreeStatus =
-  | 'DRAFT'
-  | 'REGISTERED'
-  | 'PENDING_VERIFICATION'
-  | 'VERIFIED'
-  | 'AVAILABLE'
-  | 'SPONSORED'
-  | 'MONITORING'
-  | 'MATURE'
-  | 'REJECTED'
-  | 'DEAD'
-  | 'REMOVED'
-  | 'REPLACED'
-  | 'DISPUTED';
+  | "DRAFT"
+  | "REGISTERED"
+  | "PENDING_VERIFICATION"
+  | "VERIFIED"
+  | "AVAILABLE"
+  | "SPONSORED"
+  | "MONITORING"
+  | "MATURE"
+  | "REJECTED"
+  | "DEAD"
+  | "REMOVED"
+  | "REPLACED"
+  | "DISPUTED";
 
 export interface ITree extends Document {
   projectId: Types.ObjectId;
@@ -37,7 +37,7 @@ const treeSchema = new Schema<ITree>(
   {
     projectId: {
       type: Schema.Types.ObjectId,
-      ref: 'Project',
+      ref: "Project",
       required: true,
     },
     treeCode: {
@@ -72,21 +72,21 @@ const treeSchema = new Schema<ITree>(
     status: {
       type: String,
       enum: [
-        'DRAFT',
-        'REGISTERED',
-        'PENDING_VERIFICATION',
-        'VERIFIED',
-        'AVAILABLE',
-        'SPONSORED',
-        'MONITORING',
-        'MATURE',
-        'REJECTED',
-        'DEAD',
-        'REMOVED',
-        'REPLACED',
-        'DISPUTED',
+        "DRAFT",
+        "REGISTERED",
+        "PENDING_VERIFICATION",
+        "VERIFIED",
+        "AVAILABLE",
+        "SPONSORED",
+        "MONITORING",
+        "MATURE",
+        "REJECTED",
+        "DEAD",
+        "REMOVED",
+        "REPLACED",
+        "DISPUTED",
       ],
-      default: 'DRAFT',
+      default: "DRAFT",
     },
     tokenId: {
       type: Number,
@@ -108,7 +108,8 @@ const treeSchema = new Schema<ITree>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const Tree = mongoose.models.Tree || mongoose.model<ITree>('Tree', treeSchema);
+export const Tree =
+  mongoose.models.Tree || mongoose.model<ITree>("Tree", treeSchema);

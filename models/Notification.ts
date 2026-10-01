@@ -1,12 +1,12 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { type Document, Schema, type Types } from "mongoose";
 
 export type NotificationType =
-  | 'tree_sponsored'
-  | 'verification_approved'
-  | 'verification_rejected'
-  | 'monitoring_update'
-  | 'health_warning'
-  | 'status_changed';
+  | "tree_sponsored"
+  | "verification_approved"
+  | "verification_rejected"
+  | "monitoring_update"
+  | "health_warning"
+  | "status_changed";
 
 export interface INotification extends Document {
   userId: Types.ObjectId;
@@ -23,18 +23,18 @@ const notificationSchema = new Schema<INotification>(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     type: {
       type: String,
       enum: [
-        'tree_sponsored',
-        'verification_approved',
-        'verification_rejected',
-        'monitoring_update',
-        'health_warning',
-        'status_changed',
+        "tree_sponsored",
+        "verification_approved",
+        "verification_rejected",
+        "monitoring_update",
+        "health_warning",
+        "status_changed",
       ],
       required: true,
     },
@@ -48,12 +48,12 @@ const notificationSchema = new Schema<INotification>(
     },
     treeId: {
       type: Schema.Types.ObjectId,
-      ref: 'Tree',
+      ref: "Tree",
       default: null,
     },
     verificationId: {
       type: Schema.Types.ObjectId,
-      ref: 'Verification',
+      ref: "Verification",
       default: null,
     },
     read: {
@@ -63,8 +63,9 @@ const notificationSchema = new Schema<INotification>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Notification =
-  mongoose.models.Notification || mongoose.model<INotification>('Notification', notificationSchema);
+  mongoose.models.Notification ||
+  mongoose.model<INotification>("Notification", notificationSchema);

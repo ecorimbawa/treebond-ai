@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { type Document, Schema, type Types } from "mongoose";
 
 export interface IAiAnalysis extends Document {
   evidenceId: Types.ObjectId;
@@ -6,7 +6,7 @@ export interface IAiAnalysis extends Document {
   treeConfidence: number;
   healthScore: number;
   growthScore: number;
-  anomalyRisk: 'LOW' | 'MEDIUM' | 'HIGH';
+  anomalyRisk: "LOW" | "MEDIUM" | "HIGH";
   diseaseDetected: boolean;
   explanation: string;
   modelName: string;
@@ -18,7 +18,7 @@ const aiAnalysisSchema = new Schema<IAiAnalysis>(
   {
     evidenceId: {
       type: Schema.Types.ObjectId,
-      ref: 'TreeEvidence',
+      ref: "TreeEvidence",
       required: true,
     },
     treeDetected: {
@@ -45,7 +45,7 @@ const aiAnalysisSchema = new Schema<IAiAnalysis>(
     },
     anomalyRisk: {
       type: String,
-      enum: ['LOW', 'MEDIUM', 'HIGH'],
+      enum: ["LOW", "MEDIUM", "HIGH"],
       required: true,
     },
     diseaseDetected: {
@@ -67,8 +67,9 @@ const aiAnalysisSchema = new Schema<IAiAnalysis>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const AiAnalysis =
-  mongoose.models.AiAnalysis || mongoose.model<IAiAnalysis>('AiAnalysis', aiAnalysisSchema);
+  mongoose.models.AiAnalysis ||
+  mongoose.model<IAiAnalysis>("AiAnalysis", aiAnalysisSchema);

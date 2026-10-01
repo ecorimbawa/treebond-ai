@@ -1,6 +1,10 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { type Document, Schema, type Types } from "mongoose";
 
-export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'ON_CHAIN';
+export type VerificationStatus =
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED"
+  | "ON_CHAIN";
 
 export interface IVerification extends Document {
   treeId: Types.ObjectId;
@@ -9,7 +13,7 @@ export interface IVerification extends Document {
   verifierId: Types.ObjectId;
   status: VerificationStatus;
   verificationScore: number;
-  decision: 'approved' | 'rejected';
+  decision: "approved" | "rejected";
   reason: string;
   txHash?: string;
   blockNumber?: number;
@@ -22,28 +26,28 @@ const verificationSchema = new Schema<IVerification>(
   {
     treeId: {
       type: Schema.Types.ObjectId,
-      ref: 'Tree',
+      ref: "Tree",
       required: true,
     },
     evidenceId: {
       type: Schema.Types.ObjectId,
-      ref: 'TreeEvidence',
+      ref: "TreeEvidence",
       required: true,
     },
     aiAnalysisId: {
       type: Schema.Types.ObjectId,
-      ref: 'AiAnalysis',
+      ref: "AiAnalysis",
       required: true,
     },
     verifierId: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     status: {
       type: String,
-      enum: ['PENDING', 'APPROVED', 'REJECTED', 'ON_CHAIN'],
-      default: 'PENDING',
+      enum: ["PENDING", "APPROVED", "REJECTED", "ON_CHAIN"],
+      default: "PENDING",
     },
     verificationScore: {
       type: Number,
@@ -53,7 +57,7 @@ const verificationSchema = new Schema<IVerification>(
     },
     decision: {
       type: String,
-      enum: ['approved', 'rejected'],
+      enum: ["approved", "rejected"],
       required: true,
     },
     reason: {
@@ -75,8 +79,9 @@ const verificationSchema = new Schema<IVerification>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Verification =
-  mongoose.models.Verification || mongoose.model<IVerification>('Verification', verificationSchema);
+  mongoose.models.Verification ||
+  mongoose.model<IVerification>("Verification", verificationSchema);
