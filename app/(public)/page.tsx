@@ -1,6 +1,7 @@
 // @/app/page.tsx
 "use client";
 
+import Image from "next/image";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -39,9 +40,14 @@ function Logo() {
       className="flex h-11 items-center gap-2 rounded-sm text-lg font-extrabold tracking-[-0.06em] text-[#163D2A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45]"
       aria-label="TreeBond AI home"
     >
-      <span className="grid size-7 place-items-center rounded-lg bg-[#246B45] text-white">
-        <Sprout size={16} aria-hidden="true" />
-      </span>
+      <Image
+        src="/Gemini_Generated_Image_d2an70d2an70d2an-removebg-preview.png"
+        alt="TreeBond AI logo"
+        width={28}
+        height={28}
+        priority
+        className="h-7 w-7"
+      />
       TreeBond
       <span className="rounded-full bg-[#DDEEE3] px-2 py-0.5 text-[10px] font-extrabold tracking-[.08em] text-[#246B45]">
         AI
