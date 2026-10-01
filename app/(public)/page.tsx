@@ -603,9 +603,19 @@ export default function Home() {
               className="group rounded-2xl border border-[#e2e7e2] bg-white p-6 transition hover:-translate-y-0.5 hover:border-[#9ec6aa]"
             >
               <div className="flex items-start justify-between">
-                <span className="grid size-11 place-items-center rounded-xl bg-[#DDEEE3] text-[#246B45]">
-                  <Icon size={21} aria-hidden="true" />
-                </span>
+                {number === "01" ? (
+                  <Image
+                    src="/Gemini_Generated_Image_27s70u27s70u27s7-removebg-preview.png"
+                    alt={title}
+                    width={44}
+                    height={44}
+                    className="size-11"
+                  />
+                ) : (
+                  <span className="grid size-11 place-items-center rounded-xl bg-[#DDEEE3] text-[#246B45]">
+                    <Icon size={21} aria-hidden="true" />
+                  </span>
+                )}
                 <span className={`${mono} text-xs text-[#929A94]`}>
                   {number}
                 </span>
