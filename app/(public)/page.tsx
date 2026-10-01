@@ -619,6 +619,14 @@ export default function Home() {
                     height={44}
                     className="size-11"
                   />
+                ) : number === "03" ? (
+                  <Image
+                    src="/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png"
+                    alt={title}
+                    width={44}
+                    height={44}
+                    className="size-11"
+                  />
                 ) : number === "04" ? (
                   <Image
                     src="/Gemini_Generated_Image_5vbwwm5vbwwm5vbw-removebg-preview.png"
