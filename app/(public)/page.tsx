@@ -831,13 +831,15 @@ export default function Home() {
               title="1 Sengon Tree · Central Java"
               sub="Planted 01 Sep 2026 · TREE-JTG-000192"
               icon={
-                <Image
-                  src="/01-removebg-preview.png"
-                  alt="Physical World"
-                  width={80}
-                  height={80}
-                  className="h-20 w-20"
-                />
+                <div className="size-20 overflow-hidden rounded-lg">
+                  <Image
+                    src="/01-removebg-preview.png"
+                    alt="Physical World"
+                    width={80}
+                    height={80}
+                    className="size-20 object-cover"
+                  />
+                </div>
               }
             />
             <div className="mx-auto h-9 w-px bg-[#D9A441]" />
@@ -846,13 +848,15 @@ export default function Home() {
               title="Health · Growth · Location confirmed"
               sub="Reviewed by an independent verifier"
               icon={
-                <Image
-                  src="/02-removebg-preview.png"
-                  alt="Verification"
-                  width={80}
-                  height={80}
-                  className="h-20 w-20"
-                />
+                <div className="size-20 overflow-hidden rounded-lg">
+                  <Image
+                    src="/02-removebg-preview.png"
+                    alt="Verification"
+                    width={80}
+                    height={80}
+                    className="size-20 object-cover"
+                  />
+                </div>
               }
             />
             <div className="mx-auto h-9 w-px bg-[#3154D5]" />
@@ -861,13 +865,15 @@ export default function Home() {
               title="TREE RWA #192"
               sub="1 token · Arbitrum Sepolia"
               icon={
-                <Image
-                  src="/03-removebg-preview.png"
-                  alt="Blockchain"
-                  width={80}
-                  height={80}
-                  className="h-20 w-20"
-                />
+                <div className="size-20 overflow-hidden rounded-lg">
+                  <Image
+                    src="/03-removebg-preview.png"
+                    alt="Blockchain"
+                    width={80}
+                    height={80}
+                    className="size-20 object-cover"
+                  />
+                </div>
               }
               blue
             />
