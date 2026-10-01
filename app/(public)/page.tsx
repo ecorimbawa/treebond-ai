@@ -830,21 +830,45 @@ export default function Home() {
               label="PHYSICAL WORLD"
               title="1 Sengon Tree · Central Java"
               sub="Planted 01 Sep 2026 · TREE-JTG-000192"
-              icon={<Sprout size={19} aria-hidden="true" />}
+              icon={
+                <Image
+                  src="/Gemini_Generated_Image_27s70u27s70u27s7-removebg-preview.png"
+                  alt="Physical World"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8"
+                />
+              }
             />
             <div className="mx-auto h-9 w-px bg-[#D9A441]" />
             <FlowItem
               label="VERIFICATION"
               title="Health · Growth · Location confirmed"
               sub="Reviewed by an independent verifier"
-              icon={<BadgeCheck size={19} aria-hidden="true" />}
+              icon={
+                <Image
+                  src="/Gemini_Generated_Image_536jxa536jxa536j-removebg-preview.png"
+                  alt="Verification"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8"
+                />
+              }
             />
             <div className="mx-auto h-9 w-px bg-[#3154D5]" />
             <FlowItem
               label="BLOCKCHAIN"
               title="TREE RWA #192"
               sub="1 token · Arbitrum Sepolia"
-              icon={<Blocks size={19} aria-hidden="true" />}
+              icon={
+                <Image
+                  src="/Gemini_Generated_Image_7wjar37wjar37wja-removebg-preview.png"
+                  alt="Blockchain"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8"
+                />
+              }
               blue
             />
           </div>
