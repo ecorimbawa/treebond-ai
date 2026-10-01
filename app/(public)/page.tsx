@@ -607,33 +607,33 @@ export default function Home() {
                   <Image
                     src="/01-removebg-preview.png"
                     alt={title}
-                    width={96}
-                    height={96}
-                    className="size-24"
+                    width={128}
+                    height={128}
+                    className="size-32"
                   />
                 ) : number === "02" ? (
                   <Image
                     src="/02-removebg-preview.png"
                     alt={title}
-                    width={96}
-                    height={96}
-                    className="size-24"
+                    width={128}
+                    height={128}
+                    className="size-32"
                   />
                 ) : number === "03" ? (
                   <Image
                     src="/03-removebg-preview.png"
                     alt={title}
-                    width={96}
-                    height={96}
-                    className="size-24"
+                    width={128}
+                    height={128}
+                    className="size-32"
                   />
                 ) : number === "04" ? (
                   <Image
                     src="/04-removebg-preview.png"
                     alt={title}
-                    width={96}
-                    height={96}
-                    className="size-24"
+                    width={128}
+                    height={128}
+                    className="size-32"
                   />
                 ) : (
                   <span className="grid size-11 place-items-center rounded-xl bg-[#DDEEE3] text-[#246B45]">
@@ -834,9 +834,9 @@ export default function Home() {
                 <Image
                   src="/01-removebg-preview.png"
                   alt="Physical World"
-                  width={56}
-                  height={56}
-                  className="h-14 w-14"
+                  width={80}
+                  height={80}
+                  className="h-20 w-20"
                 />
               }
             />
@@ -849,9 +849,9 @@ export default function Home() {
                 <Image
                   src="/02-removebg-preview.png"
                   alt="Verification"
-                  width={56}
-                  height={56}
-                  className="h-14 w-14"
+                  width={80}
+                  height={80}
+                  className="h-20 w-20"
                 />
               }
             />
@@ -864,9 +864,9 @@ export default function Home() {
                 <Image
                   src="/03-removebg-preview.png"
                   alt="Blockchain"
-                  width={56}
-                  height={56}
-                  className="h-14 w-14"
+                  width={80}
+                  height={80}
+                  className="h-20 w-20"
                 />
               }
               blue
@@ -1075,9 +1075,9 @@ export default function Home() {
                   <Image
                     src={imageSrc as string}
                     alt={title as string}
-                    width={44}
-                    height={44}
-                    className="size-11"
+                    width={64}
+                    height={64}
+                    className="size-16"
                   />
                   <h3 className="mt-5 text-xl font-extrabold">
                     {title as string}
@@ -1156,9 +1156,9 @@ export default function Home() {
               <Image
                 src="/Gemini_Generated_Image_d2an70d2an70d2an-removebg-preview.png"
                 alt="TreeBond AI"
-                width={32}
-                height={32}
-                className="h-8 w-8"
+                width={48}
+                height={48}
+                className="h-12 w-12"
               />
               <span className="text-lg font-extrabold tracking-[-.06em] text-white">TreeBond AI</span>
             </div>
