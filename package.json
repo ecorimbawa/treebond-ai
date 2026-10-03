@@ -11,13 +11,19 @@
     "clean": "rm -rf .next node_modules"
   },
   "dependencies": {
+    "@rainbow-me/rainbowkit": "2.2.11",
+    "@tanstack/react-query": "5.103.2",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^1.48.0",
     "mongoose": "^9.10.2",
     "next": "16.3.6",
     "next-auth": "^5.0.0-beta.32",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "viem": "2.56.8",
+    "wagmi": "2.19.5",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",

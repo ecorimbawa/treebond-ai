@@ -7,6 +7,7 @@ export interface IAiAnalysis extends Document {
   healthScore: number;
   growthScore: number;
   anomalyRisk: "LOW" | "MEDIUM" | "HIGH";
+  anomalyRiskScore: number;
   diseaseDetected: boolean;
   explanation: string;
   modelName: string;
@@ -47,6 +48,15 @@ const aiAnalysisSchema = new Schema<IAiAnalysis>(
       type: String,
       enum: ["LOW", "MEDIUM", "HIGH"],
       required: true,
+    },
+    // On-chain submitVerification() takes a uint16 0-100 score, not the
+    // LOW/MEDIUM/HIGH bucket above — kept alongside it so the oracle route
+    // has an exact value to submit later.
+    anomalyRiskScore: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 100,
     },
     diseaseDetected: {
       type: Boolean,

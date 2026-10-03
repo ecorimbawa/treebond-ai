@@ -14,6 +14,7 @@ export interface IProject extends Document {
   targetTreeCount: number;
   status: "active" | "paused" | "completed" | "archived";
   coverImageCid?: string;
+  onChainProjectId?: number;
   createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -74,6 +75,10 @@ const projectSchema = new Schema<IProject>(
     },
     coverImageCid: {
       type: String,
+      default: null,
+    },
+    onChainProjectId: {
+      type: Number,
       default: null,
     },
     createdBy: {
