@@ -1,8 +1,8 @@
 import { ArrowLeft, Sprout } from "lucide-react";
 import type { Types } from "mongoose";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Logo } from "@/components/Logo";
 import { TreePassportChainPanel } from "@/components/tree/TreePassportChainPanel";
 import { connectDB } from "@/lib/db/connection";
 import { TREE_STATUS_LABEL } from "@/lib/tree-status";
@@ -17,29 +17,6 @@ type TreePassportDoc = Omit<ITree, "projectId"> & {
   _id: Types.ObjectId;
   projectId: IProject | null;
 };
-
-function Logo() {
-  return (
-    <Link
-      href="/"
-      className="flex h-11 items-center gap-2 rounded-sm text-lg font-extrabold tracking-[-0.06em] text-[#163D2A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45]"
-      aria-label="TreeBond AI home"
-    >
-      <Image
-        src="/Gemini_Generated_Image_d2an70d2an70d2an-removebg-preview.png"
-        alt="TreeBond AI logo"
-        width={44}
-        height={44}
-        priority
-        className="h-11 w-11"
-      />
-      TreeBond
-      <span className="rounded-full bg-[#DDEEE3] px-2 py-0.5 text-[10px] font-extrabold tracking-[.08em] text-[#246B45]">
-        AI
-      </span>
-    </Link>
-  );
-}
 
 async function getTreePassport(id: string) {
   try {
@@ -94,8 +71,17 @@ export default async function TreePassportPage(
             {tree.species}
           </h1>
           <p className="mt-2 text-base text-[#667069]">
-            {project?.name ?? "Unassigned project"} · {project?.regency},{" "}
-            {project?.province}
+            {project ? (
+              <Link
+                href={`/projects/${project._id}`}
+                className="font-bold text-[#246B45] hover:text-[#163D2A] hover:underline"
+              >
+                {project.name}
+              </Link>
+            ) : (
+              "Unassigned project"
+            )}
+            {project && ` · ${project.regency}, ${project.province}`}
           </p>
           <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#DDEEE3] px-2.5 py-1 text-[10px] font-extrabold text-[#246B45]">
             {TREE_STATUS_LABEL[tree.status]}

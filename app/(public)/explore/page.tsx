@@ -1,11 +1,11 @@
 // @/app/(public)/explore/page.tsx
 "use client";
 
-import { ArrowRight, Search, Sprout } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight, MapPin, Search, Sprout } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { TREE_STATUS_LABEL } from "@/lib/tree-status";
+import { Logo } from "@/components/Logo";
+import { TreeStatusPill } from "@/components/tree/TreeStatusPill";
 import type { IProject } from "@/models/Project";
 import type { ITree, TreeStatus } from "@/models/Tree";
 
@@ -14,68 +14,12 @@ type ExploreTree = Omit<ITree, "projectId"> & {
   projectId: IProject | null;
 };
 
-const statusBucket: Record<TreeStatus, "good" | "warn" | "bad"> = {
-  DRAFT: "warn",
-  REGISTERED: "good",
-  PENDING_VERIFICATION: "warn",
-  VERIFIED: "good",
-  AVAILABLE: "good",
-  SPONSORED: "good",
-  MONITORING: "warn",
-  MATURE: "good",
-  REJECTED: "bad",
-  DEAD: "bad",
-  REMOVED: "bad",
-  REPLACED: "bad",
-  DISPUTED: "bad",
-};
-
-const bucketStyles = {
-  good: "bg-[#DDEEE3] text-[#246B45]",
-  warn: "bg-[#FBEFD9] text-[#B7791F]",
-  bad: "bg-[#F7E1DE] text-[#B3402F]",
-} as const;
-
 const statusFilters: { value: TreeStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
   { value: "AVAILABLE", label: "Available" },
   { value: "MONITORING", label: "Monitoring" },
   { value: "SPONSORED", label: "Sponsored" },
 ];
-
-function Logo() {
-  return (
-    <Link
-      href="/"
-      className="flex h-11 items-center gap-2 rounded-sm text-lg font-extrabold tracking-[-0.06em] text-[#163D2A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45]"
-      aria-label="TreeBond AI home"
-    >
-      <Image
-        src="/Gemini_Generated_Image_d2an70d2an70d2an-removebg-preview.png"
-        alt="TreeBond AI logo"
-        width={44}
-        height={44}
-        priority
-        className="h-11 w-11"
-      />
-      TreeBond
-      <span className="rounded-full bg-[#DDEEE3] px-2 py-0.5 text-[10px] font-extrabold tracking-[.08em] text-[#246B45]">
-        AI
-      </span>
-    </Link>
-  );
-}
-
-function StatusPill({ status }: { status: TreeStatus }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-extrabold ${bucketStyles[statusBucket[status]]}`}
-    >
-      <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
-      {TREE_STATUS_LABEL[status].toUpperCase()}
-    </span>
-  );
-}
 
 function TreeCard({ tree }: { tree: ExploreTree }) {
   return (
@@ -88,13 +32,19 @@ function TreeCard({ tree }: { tree: ExploreTree }) {
           {tree.treeCode}
         </p>
         <h3 className="mt-1 text-lg font-extrabold">{tree.species}</h3>
-        <p className="text-sm text-[#667069]">
-          {tree.projectId
-            ? `${tree.projectId.regency}, ${tree.projectId.province}`
-            : "Unassigned project"}
-        </p>
+        {tree.projectId ? (
+          <Link
+            href={`/projects/${tree.projectId._id}`}
+            className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-[#246B45] transition hover:text-[#163D2A] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45]"
+          >
+            <MapPin size={12} aria-hidden="true" />
+            {tree.projectId.name}
+          </Link>
+        ) : (
+          <p className="text-sm text-[#667069]">Unassigned project</p>
+        )}
         <div className="mt-3">
-          <StatusPill status={tree.status} />
+          <TreeStatusPill status={tree.status} />
         </div>
         <div className="my-4 border-t border-[#e2e7e2]" />
         <div className="flex items-center justify-between">
