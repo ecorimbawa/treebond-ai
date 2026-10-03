@@ -12,12 +12,14 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const species = searchParams.get("species");
     const projectId = searchParams.get("projectId");
+    const ownerWallet = searchParams.get("ownerWallet");
 
     // Build filter
     const filter: Record<string, string> = {};
     if (status) filter.status = status;
     if (species) filter.species = species;
     if (projectId) filter.projectId = projectId;
+    if (ownerWallet) filter.ownerWallet = ownerWallet.toLowerCase();
 
     const trees = await Tree.find(filter)
       .limit(limit)
