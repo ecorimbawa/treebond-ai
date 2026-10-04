@@ -1,10 +1,8 @@
 "use client";
 
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
-import { useAccount } from "wagmi";
-import { useEnsureArbitrumSepolia } from "@/hooks";
+import { OperatorRoleGate } from "@/components/operator/OperatorRoleGate";
 import { useRegisterTree } from "@/hooks/write/use-register-tree";
 import { getContractErrorMessage } from "@/lib/web3/errors";
 import { toMicrodegrees } from "@/lib/web3/format";
@@ -17,9 +15,6 @@ export function RegisterTreeForm({
   onChainProjectId: number;
 }) {
   const router = useRouter();
-  const { isConnected } = useAccount();
-  const { wrongChain, switchToArbitrumSepolia, isSwitching } =
-    useEnsureArbitrumSepolia();
   const { registerTree, isPending, isConfirming } = useRegisterTree();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,29 +58,38 @@ export function RegisterTreeForm({
         throw new Error(createJson.error ?? "Failed to save tree");
       setIsSaving(false);
 
-      const hash = await registerTree(
-        BigInt(onChainProjectId),
-        treeCode,
-        metadataCID,
-        toMicrodegrees(latitude),
-        toMicrodegrees(longitude),
-        plantedAtSeconds,
-      );
+      const treeId = createJson.data._id;
+      let hash: `0x${string}`;
+      try {
+        hash = await registerTree(
+          BigInt(onChainProjectId),
+          treeCode,
+          metadataCID,
+          toMicrodegrees(latitude),
+          toMicrodegrees(longitude),
+          plantedAtSeconds,
+        );
+      } catch (signError) {
+        // Nothing reached the chain, so the Mongo draft must not survive —
+        // otherwise it sits at DRAFT with no tokenId and holds the treeCode
+        // hostage on the next attempt.
+        await fetch(`/api/trees/${treeId}`, { method: "DELETE" }).catch(
+          () => {},
+        );
+        throw signError;
+      }
 
       setIsSaving(true);
-      const registerRes = await fetch(
-        `/api/trees/${createJson.data._id}/register-chain`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ txHash: hash }),
-        },
-      );
+      const registerRes = await fetch(`/api/trees/${treeId}/register-chain`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txHash: hash }),
+      });
       const registerJson = await registerRes.json();
       if (!registerJson.success)
         throw new Error(registerJson.error ?? "Failed to confirm on-chain");
 
-      router.push(`/trees/${createJson.data._id}`);
+      router.push(`/trees/${treeId}`);
       router.refresh();
     } catch (err) {
       setError(getContractErrorMessage(err));
@@ -94,82 +98,65 @@ export function RegisterTreeForm({
     }
   }
 
-  if (!isConnected) {
-    return (
-      <div className="mt-8">
-        <ConnectButton />
-      </div>
-    );
-  }
-
-  if (wrongChain) {
-    return (
-      <button
-        type="button"
-        onClick={switchToArbitrumSepolia}
-        disabled={isSwitching}
-        className="mt-8 inline-flex h-11 items-center justify-center rounded-xl bg-[#B3402F] px-4 text-sm font-bold text-white disabled:opacity-60"
-      >
-        {isSwitching ? "Switching…" : "Switch to Arbitrum Sepolia"}
-      </button>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-      <Field
-        label="Tree code"
-        name="treeCode"
-        placeholder="TREE-JTG-000192"
-        required
-      />
-      <Field label="Species" name="species" required />
-      <div className="grid grid-cols-2 gap-4">
-        <Field
-          label="Latitude"
-          name="latitude"
-          type="number"
-          step="any"
-          required
-        />
-        <Field
-          label="Longitude"
-          name="longitude"
-          type="number"
-          step="any"
-          required
-        />
-        <Field label="Planted at" name="plantedAt" type="date" required />
-        <Field
-          label="Initial height (cm)"
-          name="initialHeightCm"
-          type="number"
-          required
-        />
-      </div>
-      <Field
-        label="Metadata CID"
-        name="metadataCID"
-        placeholder="ipfs://... (plain string for now)"
-        required
-      />
+    <div className="mt-8">
+      <OperatorRoleGate>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Field
+            label="Tree code"
+            name="treeCode"
+            placeholder="TREE-JTG-000192"
+            required
+          />
+          <Field label="Species" name="species" required />
+          <div className="grid grid-cols-2 gap-4">
+            <Field
+              label="Latitude"
+              name="latitude"
+              type="number"
+              step="any"
+              required
+            />
+            <Field
+              label="Longitude"
+              name="longitude"
+              type="number"
+              step="any"
+              required
+            />
+            <Field label="Planted at" name="plantedAt" type="date" required />
+            <Field
+              label="Initial height (cm)"
+              name="initialHeightCm"
+              type="number"
+              required
+            />
+          </div>
+          <Field
+            label="Metadata CID"
+            name="metadataCID"
+            placeholder="ipfs://... (plain string for now)"
+            required
+          />
 
-      {error && <p className="text-sm text-[#B3402F]">{error}</p>}
+          {error && <p className="text-sm text-[#B3402F]">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={isBusy}
-        className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white transition hover:bg-[#163D2A] disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {isPending
-          ? "Confirm in wallet…"
-          : isConfirming
-            ? "Waiting for confirmation…"
-            : isSaving
-              ? "Saving…"
-              : "Register Tree"}
-      </button>
-    </form>
+          <button
+            type="submit"
+            disabled={isBusy}
+            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white transition hover:bg-[#163D2A] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending
+              ? "Confirm in wallet…"
+              : isConfirming
+                ? "Waiting for confirmation…"
+                : isSaving
+                  ? "Saving…"
+                  : "Register Tree"}
+          </button>
+        </form>
+      </OperatorRoleGate>
+    </div>
   );
 }
 

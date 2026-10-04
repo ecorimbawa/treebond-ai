@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/connection";
+import { isDuplicateKeyError } from "@/lib/db/errors";
 import { Tree } from "@/models";
 
 export async function GET(request: NextRequest) {
@@ -82,6 +83,17 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
+    // `treeCode` is a unique index and is also the code written on-chain.
+    if (isDuplicateKeyError(error)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "A tree with that code already exists. Use a different tree code.",
+        },
+        { status: 409 },
+      );
+    }
     console.error("POST /api/trees error:", error);
     return NextResponse.json(
       {

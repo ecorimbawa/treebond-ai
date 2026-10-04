@@ -5,7 +5,7 @@ import { auth } from "@/auth";
 import { CHAIN_ID, CONTRACTS } from "@/contracts/generated/addresses";
 import { connectDB } from "@/lib/db/connection";
 import { TreeRegistryAbi } from "@/lib/web3/abis/TreeRegistry";
-import { serverClient } from "@/lib/web3/server-client";
+import { getReceiptWithRetry } from "@/lib/web3/receipt";
 import { BlockchainTransaction, Project, Tree } from "@/models";
 
 const bodySchema = z.object({
@@ -69,17 +69,16 @@ export async function POST(
       return NextResponse.json({ success: true, data: tree }, { status: 200 });
     }
 
-    let receipt: Awaited<ReturnType<typeof serverClient.getTransactionReceipt>>;
+    let receipt: Awaited<ReturnType<typeof getReceiptWithRetry>>;
     try {
-      receipt = await serverClient.getTransactionReceipt({
-        hash: txHash as `0x${string}`,
-      });
+      receipt = await getReceiptWithRetry(txHash as `0x${string}`);
     } catch (error) {
       if (error instanceof TransactionReceiptNotFoundError) {
         return NextResponse.json(
           {
             success: false,
-            error: "Transaction not confirmed yet, try again shortly",
+            error:
+              "Transaction is not visible on our node yet. It may still land — retry in a moment before creating this again.",
           },
           { status: 409 },
         );

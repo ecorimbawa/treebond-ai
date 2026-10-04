@@ -1,11 +1,10 @@
 // @/app/operator/projects/new/page.tsx
 "use client";
 
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { useAccount } from "wagmi";
-import { useEnsureArbitrumSepolia } from "@/hooks";
+import { OperatorRoleGate } from "@/components/operator/OperatorRoleGate";
 import { useCreateProject } from "@/hooks/write/use-create-project";
 import { getContractErrorMessage } from "@/lib/web3/errors";
 
@@ -19,9 +18,7 @@ function slugify(value: string) {
 
 export default function OperatorCreateProjectPage() {
   const router = useRouter();
-  const { address, isConnected } = useAccount();
-  const { wrongChain, switchToArbitrumSepolia, isSwitching } =
-    useEnsureArbitrumSepolia();
+  const { address } = useAccount();
   const { createProject, isPending, isConfirming } = useCreateProject();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,17 +59,27 @@ export default function OperatorCreateProjectPage() {
         throw new Error(createJson.error ?? "Failed to save project");
       setIsSaving(false);
 
-      const hash = await createProject(slug, name, metadataCID, address);
+      const projectId = createJson.data._id;
+      let hash: `0x${string}`;
+      try {
+        hash = await createProject(slug, name, metadataCID, address);
+      } catch (signError) {
+        // Nothing reached the chain — a rejected or reverted signature means
+        // no project exists there, so the draft must not survive either. It
+        // would otherwise sit at "NOT ON-CHAIN" forever and block the slug on
+        // the next attempt.
+        await fetch(`/api/projects/${projectId}`, { method: "DELETE" }).catch(
+          () => {},
+        );
+        throw signError;
+      }
 
       setIsSaving(true);
-      const linkRes = await fetch(
-        `/api/projects/${createJson.data._id}/chain-link`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ txHash: hash }),
-        },
-      );
+      const linkRes = await fetch(`/api/projects/${projectId}/chain-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txHash: hash }),
+      });
       const linkJson = await linkRes.json();
       if (!linkJson.success)
         throw new Error(linkJson.error ?? "Failed to confirm on-chain");
@@ -99,90 +106,79 @@ export default function OperatorCreateProjectPage() {
         operator wallet you connect below.
       </p>
 
-      {!isConnected ? (
-        <div className="mt-8">
-          <ConnectButton />
-        </div>
-      ) : wrongChain ? (
-        <button
-          type="button"
-          onClick={switchToArbitrumSepolia}
-          disabled={isSwitching}
-          className="mt-8 inline-flex h-11 items-center justify-center rounded-xl bg-[#B3402F] px-4 text-sm font-bold text-white disabled:opacity-60"
-        >
-          {isSwitching ? "Switching…" : "Switch to Arbitrum Sepolia"}
-        </button>
-      ) : (
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-          <Field label="Project name" name="name" required />
-          <Field
-            label="Slug (on-chain code)"
-            name="slug"
-            placeholder="auto from name"
-          />
-          <Field label="Description" name="description" required textarea />
-          <div className="grid grid-cols-2 gap-4">
+      <div className="mt-8">
+        <OperatorRoleGate>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Field label="Project name" name="name" required />
             <Field
-              label="Country"
-              name="country"
-              defaultValue="Indonesia"
+              label="Slug (on-chain code)"
+              name="slug"
+              placeholder="auto from name"
+            />
+            <Field label="Description" name="description" required textarea />
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label="Country"
+                name="country"
+                defaultValue="Indonesia"
+                required
+              />
+              <Field label="Province" name="province" required />
+              <Field label="Regency" name="regency" required />
+              <Field label="Village" name="village" required />
+              <Field
+                label="Latitude"
+                name="latitude"
+                type="number"
+                step="any"
+                required
+              />
+              <Field
+                label="Longitude"
+                name="longitude"
+                type="number"
+                step="any"
+                required
+              />
+              <Field
+                label="Area (hectares)"
+                name="areaHectares"
+                type="number"
+                step="any"
+                required
+              />
+              <Field
+                label="Target tree count"
+                name="targetTreeCount"
+                type="number"
+                required
+              />
+            </div>
+            <Field
+              label="Metadata CID"
+              name="metadataCID"
+              placeholder="ipfs://... (plain string for now)"
               required
             />
-            <Field label="Province" name="province" required />
-            <Field label="Regency" name="regency" required />
-            <Field label="Village" name="village" required />
-            <Field
-              label="Latitude"
-              name="latitude"
-              type="number"
-              step="any"
-              required
-            />
-            <Field
-              label="Longitude"
-              name="longitude"
-              type="number"
-              step="any"
-              required
-            />
-            <Field
-              label="Area (hectares)"
-              name="areaHectares"
-              type="number"
-              step="any"
-              required
-            />
-            <Field
-              label="Target tree count"
-              name="targetTreeCount"
-              type="number"
-              required
-            />
-          </div>
-          <Field
-            label="Metadata CID"
-            name="metadataCID"
-            placeholder="ipfs://... (plain string for now)"
-            required
-          />
 
-          {error && <p className="text-sm text-[#B3402F]">{error}</p>}
+            {error && <p className="text-sm text-[#B3402F]">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={isBusy}
-            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white transition hover:bg-[#163D2A] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isPending
-              ? "Confirm in wallet…"
-              : isConfirming
-                ? "Waiting for confirmation…"
-                : isSaving
-                  ? "Saving…"
-                  : "Create Project"}
-          </button>
-        </form>
-      )}
+            <button
+              type="submit"
+              disabled={isBusy}
+              className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white transition hover:bg-[#163D2A] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isPending
+                ? "Confirm in wallet…"
+                : isConfirming
+                  ? "Waiting for confirmation…"
+                  : isSaving
+                    ? "Saving…"
+                    : "Create Project"}
+            </button>
+          </form>
+        </OperatorRoleGate>
+      </div>
     </main>
   );
 }

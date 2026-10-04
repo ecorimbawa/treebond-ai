@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/db/connection";
+import { isDuplicateKeyError } from "@/lib/db/errors";
 import { Project } from "@/models";
 
 export async function GET(request: NextRequest) {
@@ -75,6 +76,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: project }, { status: 201 });
   } catch (error) {
+    // `slug` is a unique index, and it doubles as the on-chain project code.
+    // Reporting this as a generic 500 hid the real problem: the operator saw
+    // "Failed to create project" with no hint that the name was already taken,
+    // and no wallet prompt ever appeared because this step runs first.
+    if (isDuplicateKeyError(error)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "A project with that slug already exists. Pick a different name or slug.",
+        },
+        { status: 409 },
+      );
+    }
     console.error("POST /api/projects error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to create project" },
