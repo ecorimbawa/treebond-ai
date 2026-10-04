@@ -1,5 +1,8 @@
 // @/app/verifier/[verificationId]/page.tsx
-import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { VerificationActions } from "@/components/verifier/VerificationActions";
 import { connectDB } from "@/lib/db/connection";
 import { AiAnalysis, Tree, TreeEvidence, Verification } from "@/models";
@@ -7,6 +10,11 @@ import { AiAnalysis, Tree, TreeEvidence, Verification } from "@/models";
 export default async function VerifierReviewPage(
   props: PageProps<"/verifier/[verificationId]">,
 ) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "verifier") {
+    redirect("/login");
+  }
+
   const { verificationId } = await props.params;
 
   await connectDB();
@@ -22,7 +30,14 @@ export default async function VerifierReviewPage(
 
   return (
     <main className="mx-auto max-w-2xl px-5 py-12">
-      <p className="text-xs font-extrabold tracking-[0.16em] text-[#B7791F]">
+      <Link
+        href="/verifier"
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-[#667069] transition hover:text-[#163D2A]"
+      >
+        <ArrowLeft size={16} aria-hidden="true" />
+        Back to Queue
+      </Link>
+      <p className="mt-4 text-xs font-extrabold tracking-[0.16em] text-[#B7791F]">
         VERIFIER · REVIEW
       </p>
       <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[#163D2A]">

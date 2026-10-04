@@ -2,6 +2,7 @@
 
 import type { Types } from "mongoose";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/db/connection";
 import { TreeEvidence } from "@/models";
@@ -15,15 +16,15 @@ type PendingEvidence = Omit<ITreeEvidence, "treeId"> & {
 
 export default async function VerifierQueuePage() {
   const session = await auth();
+  if (!session?.user || session.user.role !== "verifier") {
+    redirect("/login");
+  }
 
   await connectDB();
-  const pending =
-    session?.user?.role === "verifier"
-      ? ((await TreeEvidence.find({ status: "pending" })
-          .populate("treeId")
-          .sort({ capturedAt: -1 })
-          .lean()) as PendingEvidence[])
-      : [];
+  const pending = (await TreeEvidence.find({ status: "pending" })
+    .populate("treeId")
+    .sort({ capturedAt: -1 })
+    .lean()) as PendingEvidence[];
 
   return (
     <main className="mx-auto max-w-[1000px] px-5 py-12">
