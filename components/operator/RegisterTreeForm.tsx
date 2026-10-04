@@ -2,8 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import { ImageUploadField } from "@/components/operator/ImageUploadField";
 import { OperatorRoleGate } from "@/components/operator/OperatorRoleGate";
 import { useRegisterTree } from "@/hooks/write/use-register-tree";
+import { placeholderCid } from "@/lib/ipfs/placeholder";
 import { getContractErrorMessage } from "@/lib/web3/errors";
 import { toMicrodegrees } from "@/lib/web3/format";
 
@@ -16,6 +18,8 @@ export function RegisterTreeForm({
 }) {
   const router = useRouter();
   const { registerTree, isPending, isConfirming } = useRegisterTree();
+  const [treeCode, setTreeCode] = useState("");
+  const [metadataCid, setMetadataCid] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,13 +30,12 @@ export function RegisterTreeForm({
     setError(null);
 
     const form = new FormData(event.currentTarget);
-    const treeCode = String(form.get("treeCode") ?? "");
     const species = String(form.get("species") ?? "");
     const latitude = Number(form.get("latitude"));
     const longitude = Number(form.get("longitude"));
     const plantedAt = String(form.get("plantedAt") ?? "");
     const initialHeightCm = Number(form.get("initialHeightCm"));
-    const metadataCID = String(form.get("metadataCID") ?? "");
+    const metadataCID = metadataCid ?? placeholderCid(treeCode);
     const plantedAtSeconds = BigInt(
       Math.floor(new Date(plantedAt).getTime() / 1000),
     );
@@ -106,6 +109,8 @@ export function RegisterTreeForm({
             label="Tree code"
             name="treeCode"
             placeholder="TREE-JTG-000192"
+            value={treeCode}
+            onChange={setTreeCode}
             required
           />
           <Field label="Species" name="species" required />
@@ -132,11 +137,11 @@ export function RegisterTreeForm({
               required
             />
           </div>
-          <Field
-            label="Metadata CID"
-            name="metadataCID"
-            placeholder="ipfs://... (plain string for now)"
-            required
+          <ImageUploadField
+            label="Tree photo"
+            uploadLabel={`tree-${treeCode || "untitled"}`}
+            value={metadataCid}
+            onChange={setMetadataCid}
           />
 
           {error && <p className="text-sm text-[#B3402F]">{error}</p>}
@@ -167,6 +172,8 @@ function Field({
   required,
   placeholder,
   step,
+  value,
+  onChange,
 }: {
   label: string;
   name: string;
@@ -174,6 +181,8 @@ function Field({
   required?: boolean;
   placeholder?: string;
   step?: string;
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
   return (
     <label className="block text-sm" htmlFor={name}>
@@ -185,6 +194,8 @@ function Field({
         step={step}
         required={required}
         placeholder={placeholder}
+        value={value}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         className="mt-1.5 w-full rounded-xl border border-[#d9e2da] px-3 py-2 text-sm outline-none focus:border-[#246B45]"
       />
     </label>

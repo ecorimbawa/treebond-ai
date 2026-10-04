@@ -4,8 +4,10 @@
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { useAccount } from "wagmi";
+import { ImageUploadField } from "@/components/operator/ImageUploadField";
 import { OperatorRoleGate } from "@/components/operator/OperatorRoleGate";
 import { useCreateProject } from "@/hooks/write/use-create-project";
+import { placeholderCid } from "@/lib/ipfs/placeholder";
 import { getContractErrorMessage } from "@/lib/web3/errors";
 
 function slugify(value: string) {
@@ -16,22 +18,12 @@ function slugify(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-// IPFS pinning is a deliberately deferred feature (see
-// docs/GAP-ANALYSIS-TREEBOND-AI.md §26-30) — there is no upload pipeline yet,
-// so a real content-addressed CID can't be produced here. This placeholder
-// keeps the on-chain field non-empty (an empty string reverts with
-// EmptyString()) using the same `placeholder-<slug>` shape the seeding
-// scripts already write, so a project looks the same whether it was created
-// from this form or from scripts/prepare-demo.mjs.
-function placeholderCid(slug: string) {
-  return `placeholder-${slug}`;
-}
-
 export default function OperatorCreateProjectPage() {
   const router = useRouter();
   const { address } = useAccount();
   const { createProject, isPending, isConfirming } = useCreateProject();
   const [name, setName] = useState("");
+  const [coverImageCid, setCoverImageCid] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +41,7 @@ export default function OperatorCreateProjectPage() {
     }
 
     const form = new FormData(event.currentTarget);
-    const metadataCID = placeholderCid(slug);
+    const metadataCID = coverImageCid ?? placeholderCid(slug);
 
     try {
       setIsSaving(true);
@@ -148,6 +140,14 @@ export default function OperatorCreateProjectPage() {
                 </span>
               </p>
             </div>
+
+            <ImageUploadField
+              label="Cover photo"
+              uploadLabel={`project-${slug || "untitled"}`}
+              value={coverImageCid}
+              onChange={setCoverImageCid}
+            />
+
             <Field label="Description" name="description" required textarea />
             <div className="grid grid-cols-2 gap-4">
               <Field

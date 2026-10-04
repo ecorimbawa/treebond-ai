@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import { ImageUploadField } from "@/components/operator/ImageUploadField";
+import { placeholderCid } from "@/lib/ipfs/placeholder";
 
 const EVIDENCE_TYPES = [
   "INITIAL_PLANTING",
@@ -15,6 +17,7 @@ const EVIDENCE_TYPES = [
 
 export function EvidenceForm({ mongoTreeId }: { mongoTreeId: string }) {
   const router = useRouter();
+  const [imageCid, setImageCid] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +33,7 @@ export function EvidenceForm({ mongoTreeId }: { mongoTreeId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: form.get("type"),
-          imageCid: form.get("imageCid"),
+          imageCid: imageCid ?? placeholderCid(`${mongoTreeId}-${Date.now()}`),
           latitude: form.get("latitude"),
           longitude: form.get("longitude"),
           capturedAt: new Date(String(form.get("capturedAt"))).toISOString(),
@@ -55,11 +58,11 @@ export function EvidenceForm({ mongoTreeId }: { mongoTreeId: string }) {
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-4">
       <Select label="Evidence type" name="type" options={EVIDENCE_TYPES} />
-      <Field
-        label="Image CID"
-        name="imageCid"
-        placeholder="ipfs://... (plain string for now)"
-        required
+      <ImageUploadField
+        label="Monitoring photo"
+        uploadLabel={`evidence-${mongoTreeId}`}
+        value={imageCid}
+        onChange={setImageCid}
       />
       <div className="grid grid-cols-2 gap-4">
         <Field
