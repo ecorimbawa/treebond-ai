@@ -84,8 +84,9 @@ export default async function AdminDashboardPage() {
         <p className="mt-1 text-sm text-[#667069]">
           Promoting a user to operator/verifier in the app (not built here)
           doesn't give their wallet any power on-chain — the contract only
-          trusts roles granted directly on TreeRegistry. This calls{" "}
-          <code>grantRole</code> using the admin wallet.
+          trusts roles granted directly on TreeRegistry. Connect the wallet that
+          holds <code>DEFAULT_ADMIN_ROLE</code> below to call{" "}
+          <code>grantRole</code> directly — no server-held key involved.
         </p>
         <div className="mt-4 max-w-md">
           <GrantRoleForm />
