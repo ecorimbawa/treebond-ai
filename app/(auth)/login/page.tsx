@@ -1,11 +1,17 @@
+// @/app/(auth)/login/page.tsx
 "use client";
-
 import { ArrowRight, Sprout } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
+
+const HOME_BY_ROLE: Record<string, string> = {
+  operator: "/operator",
+  verifier: "/verifier",
+  admin: "/admin",
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,7 +38,9 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    const session = await getSession();
+    const role = session?.user?.role;
+    router.push((role && HOME_BY_ROLE[role]) || "/dashboard");
   }
 
   return (
