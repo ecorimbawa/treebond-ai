@@ -16,24 +16,40 @@ function slugify(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+// IPFS pinning is a deliberately deferred feature (see
+// docs/GAP-ANALYSIS-TREEBOND-AI.md §26-30) — there is no upload pipeline yet,
+// so a real content-addressed CID can't be produced here. This placeholder
+// keeps the on-chain field non-empty (an empty string reverts with
+// EmptyString()) using the same `placeholder-<slug>` shape the seeding
+// scripts already write, so a project looks the same whether it was created
+// from this form or from scripts/prepare-demo.mjs.
+function placeholderCid(slug: string) {
+  return `placeholder-${slug}`;
+}
+
 export default function OperatorCreateProjectPage() {
   const router = useRouter();
   const { address } = useAccount();
   const { createProject, isPending, isConfirming } = useCreateProject();
+  const [name, setName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isBusy = isPending || isConfirming || isSaving;
+  const slug = slugify(name);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!address) return;
     setError(null);
 
+    if (!slug) {
+      setError("Project name must contain at least one letter or number.");
+      return;
+    }
+
     const form = new FormData(event.currentTarget);
-    const name = String(form.get("name") ?? "");
-    const slug = slugify(String(form.get("slug") || name));
-    const metadataCID = String(form.get("metadataCID") ?? "");
+    const metadataCID = placeholderCid(slug);
 
     try {
       setIsSaving(true);
@@ -43,6 +59,7 @@ export default function OperatorCreateProjectPage() {
         body: JSON.stringify({
           name,
           slug,
+          coverImageCid: metadataCID,
           description: form.get("description"),
           country: form.get("country"),
           province: form.get("province"),
@@ -109,12 +126,28 @@ export default function OperatorCreateProjectPage() {
       <div className="mt-8">
         <OperatorRoleGate>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Field label="Project name" name="name" required />
-            <Field
-              label="Slug (on-chain code)"
-              name="slug"
-              placeholder="auto from name"
-            />
+            <div>
+              <label className="block text-sm" htmlFor="name">
+                <span className="font-bold text-[#163D2A]">Project name</span>
+                <input
+                  id="name"
+                  name="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="mt-1.5 w-full rounded-xl border border-[#d9e2da] px-3 py-2 text-sm outline-none focus:border-[#246B45]"
+                />
+              </label>
+              {/* The on-chain code is derived from the name, not typed
+                  separately — one less field, and it can never drift out of
+                  sync with what createProject() actually writes. */}
+              <p className="mt-1.5 text-xs text-[#929A94]">
+                On-chain code:{" "}
+                <span className="font-[family-name:var(--font-geist-mono)] text-[#667069]">
+                  {slug || "—"}
+                </span>
+              </p>
+            </div>
             <Field label="Description" name="description" required textarea />
             <div className="grid grid-cols-2 gap-4">
               <Field
@@ -154,12 +187,6 @@ export default function OperatorCreateProjectPage() {
                 required
               />
             </div>
-            <Field
-              label="Metadata CID"
-              name="metadataCID"
-              placeholder="ipfs://... (plain string for now)"
-              required
-            />
 
             {error && <p className="text-sm text-[#B3402F]">{error}</p>}
 

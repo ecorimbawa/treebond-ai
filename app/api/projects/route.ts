@@ -68,6 +68,10 @@ export async function POST(request: NextRequest) {
       longitude: body.longitude,
       areaHectares: body.areaHectares,
       targetTreeCount: body.targetTreeCount,
+      // The same CID the form passes to createProject() on-chain. Previously
+      // this was typed by the operator and never persisted anywhere — the
+      // Mongo record had no way to show what was actually written on-chain.
+      coverImageCid: body.coverImageCid,
       createdBy: session.user.id,
       status: "active",
     });
@@ -85,7 +89,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error:
-            "A project with that slug already exists. Pick a different name or slug.",
+            "A project with that name already exists on-chain. Choose a different project name.",
         },
         { status: 409 },
       );
