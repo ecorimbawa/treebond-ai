@@ -1,7 +1,7 @@
 "use client";
 
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { Wallet } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
@@ -94,7 +94,13 @@ export function WalletSignInButton({
         disabled={isBusy}
         className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#d9e2da] bg-white text-sm font-bold text-[#163D2A] transition duration-200 hover:border-[#246B45] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <Wallet size={16} aria-hidden="true" />
+        <Image
+          src="/metamask-fox.svg"
+          alt=""
+          width={16}
+          height={16}
+          aria-hidden="true"
+        />
         {isBusy ? "Check your wallet…" : isConnected ? label : "Connect Wallet"}
       </button>
       {isConnected && address && !isBusy && (
