@@ -21,7 +21,7 @@
 <br />
 
 <div align="center">
-  <img src="public/tree-hero.png" alt="TreeBond tree illustration" height="220" />
+  <img src="public/hero.png" alt="TreeBond AI landing page" width="100%" />
 </div>
 
 ## What this is
@@ -96,7 +96,7 @@ exception is the oracle, which pushes verification results from
 `/api/oracle/submit-verification` and holds `ORACLE_ROLE` on
 `VerificationRegistry`.
 
-## Getting started
+## How to start
 
 ```bash
 git clone https://github.com/ecorimbawa/treebond-ai.git
