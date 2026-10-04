@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
   turbopack: {
     // @wagmi/connectors' baseAccount connector (bundled inside RainbowKit's
     // dist regardless of the `wallets` list in lib/web3/config.ts, which only

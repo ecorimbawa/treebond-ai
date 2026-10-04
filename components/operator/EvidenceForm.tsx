@@ -43,7 +43,7 @@ export function EvidenceForm({ mongoTreeId }: { mongoTreeId: string }) {
       const json = await res.json();
       if (!json.success)
         throw new Error(json.error ?? "Failed to save evidence");
-      router.push("/operator");
+      router.push(`/trees/${mongoTreeId}`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save evidence");

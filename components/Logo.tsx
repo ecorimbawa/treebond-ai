@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export function Logo() {
+export function Logo({ variant = "dark" }: { variant?: "dark" | "light" }) {
   return (
     <Link
       href="/"
-      className="flex h-11 items-center gap-2 rounded-sm text-lg font-extrabold tracking-[-0.06em] text-[#163D2A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45]"
+      className={`flex h-11 items-center gap-2 rounded-sm text-lg font-extrabold tracking-[-0.06em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45] ${
+        variant === "light" ? "text-white" : "text-[#163D2A]"
+      }`}
       aria-label="TreeBond AI home"
     >
       <Image
@@ -17,7 +19,13 @@ export function Logo() {
         className="h-11 w-11"
       />
       TreeBond
-      <span className="rounded-full bg-[#DDEEE3] px-2 py-0.5 text-[10px] font-extrabold tracking-[.08em] text-[#246B45]">
+      <span
+        className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold tracking-[.08em] ${
+          variant === "light"
+            ? "bg-white/15 text-white"
+            : "bg-[#DDEEE3] text-[#246B45]"
+        }`}
+      >
         AI
       </span>
     </Link>

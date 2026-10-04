@@ -1,10 +1,11 @@
 "use client";
 
 import { ArrowRight, Sprout } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AuthImagePanel } from "@/components/auth/AuthImagePanel";
+import { Logo } from "@/components/Logo";
 
 export default function CreateAccountPage() {
   const router = useRouter();
@@ -37,31 +38,23 @@ export default function CreateAccountPage() {
   }
 
   return (
-    <main className="flex min-h-[100dvh] items-center justify-center bg-[#FAFAF7] px-5 py-12 text-[#18201B]">
-      <div className="w-full max-w-sm">
-        <Link
-          href="/"
-          className="mb-8 flex h-11 items-center justify-center gap-2 rounded-sm text-lg font-extrabold tracking-[-0.06em] text-[#163D2A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45]"
-        >
-          <Image
-            src="/Gemini_Generated_Image_d2an70d2an70d2an-removebg-preview.png"
-            alt="TreeBond AI logo"
-            width={44}
-            height={44}
-            priority
-            className="h-11 w-11"
-          />
-          TreeBond
-          <span className="rounded-full bg-[#DDEEE3] px-2 py-0.5 text-[10px] font-extrabold tracking-[0.08em] text-[#246B45]">
-            AI
-          </span>
-        </Link>
+    <main className="flex min-h-[100dvh] text-[#18201B]">
+      <AuthImagePanel
+        eyebrow="TREEBOND AI"
+        heading="Making Living Assets Verifiable On-Chain."
+        body="Join TreeBond AI to sponsor real trees, backed by on-chain verification at every step."
+      />
 
-        <div className="rounded-2xl border border-[#e2e7e2] bg-white p-7">
-          <h1 className="text-2xl font-extrabold tracking-[-0.04em] text-[#163D2A]">
+      <div className="flex w-full items-center justify-center bg-[#FAFAF7] px-5 py-12 lg:w-1/2">
+        <div className="w-full max-w-sm">
+          <div className="mb-8 flex justify-center">
+            <Logo />
+          </div>
+
+          <h1 className="text-center text-2xl font-extrabold tracking-[-0.04em] text-[#163D2A]">
             Create your account
           </h1>
-          <p className="mt-1 text-sm text-[#667069]">
+          <p className="mt-1 text-center text-sm text-[#667069]">
             Sponsor real trees and track their growth.
           </p>
 
@@ -147,17 +140,17 @@ export default function CreateAccountPage() {
             <Sprout size={13} aria-hidden="true" />
             New accounts are registered as Sponsors.
           </p>
-        </div>
 
-        <p className="mt-6 text-center text-sm text-[#667069]">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-bold text-[#246B45] hover:text-[#163D2A]"
-          >
-            Log in
-          </Link>
-        </p>
+          <p className="mt-6 text-center text-sm text-[#667069]">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-bold text-[#246B45] hover:text-[#163D2A]"
+            >
+              Log in
+            </Link>
+          </p>
+        </div>
       </div>
     </main>
   );

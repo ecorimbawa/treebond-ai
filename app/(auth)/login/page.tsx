@@ -1,14 +1,15 @@
 // @/app/(auth)/login/page.tsx
 "use client";
 import { ArrowRight, Sprout } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
+import { AuthImagePanel } from "@/components/auth/AuthImagePanel";
+import { Logo } from "@/components/Logo";
 
 const HOME_BY_ROLE: Record<string, string> = {
-  operator: "/operator",
+  operator: "/operator/projects",
   verifier: "/verifier",
   admin: "/admin",
 };
@@ -44,31 +45,23 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-[100dvh] items-center justify-center bg-[#FAFAF7] px-5 py-12 text-[#18201B]">
-      <div className="w-full max-w-sm">
-        <Link
-          href="/"
-          className="mb-8 flex h-11 items-center justify-center gap-2 rounded-sm text-lg font-extrabold tracking-[-0.06em] text-[#163D2A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45]"
-        >
-          <Image
-            src="/Gemini_Generated_Image_d2an70d2an70d2an-removebg-preview.png"
-            alt="TreeBond AI logo"
-            width={44}
-            height={44}
-            priority
-            className="h-11 w-11"
-          />
-          TreeBond
-          <span className="rounded-full bg-[#DDEEE3] px-2 py-0.5 text-[10px] font-extrabold tracking-[0.08em] text-[#246B45]">
-            AI
-          </span>
-        </Link>
+    <main className="flex min-h-[100dvh] text-[#18201B]">
+      <AuthImagePanel
+        eyebrow="TREEBOND AI"
+        heading="Every tree has a story. Every story has proof."
+        body="Log back in to track the trees you've sponsored and watch their verified growth."
+      />
 
-        <div className="rounded-2xl border border-[#e2e7e2] bg-white p-7">
-          <h1 className="text-2xl font-extrabold tracking-[-0.04em] text-[#163D2A]">
+      <div className="flex w-full items-center justify-center bg-[#FAFAF7] px-5 py-12 lg:w-1/2">
+        <div className="w-full max-w-sm">
+          <div className="mb-8 flex justify-center">
+            <Logo />
+          </div>
+
+          <h1 className="text-center text-2xl font-extrabold tracking-[-0.04em] text-[#163D2A]">
             Welcome back
           </h1>
-          <p className="mt-1 text-sm text-[#667069]">
+          <p className="mt-1 text-center text-sm text-[#667069]">
             Log in to track your sponsored trees.
           </p>
 
@@ -135,17 +128,17 @@ export default function LoginPage() {
             <Sprout size={13} aria-hidden="true" />
             This is a hackathon MVP. Auth is minimal by design.
           </p>
-        </div>
 
-        <p className="mt-6 text-center text-sm text-[#667069]">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/create-account"
-            className="font-bold text-[#246B45] hover:text-[#163D2A]"
-          >
-            Create one
-          </Link>
-        </p>
+          <p className="mt-6 text-center text-sm text-[#667069]">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/create-account"
+              className="font-bold text-[#246B45] hover:text-[#163D2A]"
+            >
+              Create one
+            </Link>
+          </p>
+        </div>
       </div>
     </main>
   );
