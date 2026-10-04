@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useConfig, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "wagmi/actions";
 import { treeBond } from "@/lib/web3/contracts";
-import { getGasFees } from "@/lib/web3/gas";
 
 export function useSponsorTree() {
   const config = useConfig();
@@ -14,11 +13,12 @@ export function useSponsorTree() {
   const [isConfirming, setIsConfirming] = useState(false);
 
   const sponsorTree = async (tokenId: bigint, price: bigint) => {
-    const fees = await getGasFees(config);
-
+    // No maxFeePerGas override: the wallet estimates. An explicit value here
+    // was being rendered by MetaMask as if it were gwei rather than wei,
+    // quoting ~56,000 ETH for a transaction that actually costs a fraction of
+    // a cent, which left the confirm button permanently disabled.
     const hash = await writeContractAsync({
       ...treeBond,
-      ...fees,
       functionName: "sponsorTree",
       args: [tokenId],
       // must match getTreePrice(tokenId) exactly; anything else reverts IncorrectPayment

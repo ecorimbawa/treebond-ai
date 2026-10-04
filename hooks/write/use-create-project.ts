@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useConfig, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "wagmi/actions";
 import { treeRegistry } from "@/lib/web3/contracts";
-import { getGasFees } from "@/lib/web3/gas";
 
 export function useCreateProject() {
   const config = useConfig();
@@ -19,11 +18,12 @@ export function useCreateProject() {
     metadataCID: string,
     operator: `0x${string}`,
   ) => {
-    const fees = await getGasFees(config);
-
+    // No maxFeePerGas override: the wallet estimates. An explicit value here
+    // was being rendered by MetaMask as if it were gwei rather than wei,
+    // quoting ~56,000 ETH for a transaction that actually costs a fraction of
+    // a cent, which left the confirm button permanently disabled.
     const hash = await writeContractAsync({
       ...treeRegistry,
-      ...fees,
       functionName: "createProject",
       args: [code, name, metadataCID, operator],
     });
