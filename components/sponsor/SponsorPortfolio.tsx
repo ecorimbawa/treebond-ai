@@ -229,48 +229,58 @@ export function SponsorPortfolio() {
                   <li key={tree._id}>
                     <Link
                       href={`/trees/${tree._id}`}
-                      className="group block h-full rounded-2xl border border-[#e2e7e2] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#9ec6aa] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45]"
+                      className="group block h-full overflow-hidden rounded-2xl border border-[#e2e7e2] bg-white transition hover:-translate-y-0.5 hover:border-[#9ec6aa] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#246B45]"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className={`${mono} text-xs text-[#929A94]`}>
-                            {tree.treeCode}
-                          </p>
-                          <h3 className="mt-1 text-lg font-extrabold tracking-[-0.03em] text-[#163D2A]">
-                            {tree.species}
-                          </h3>
-                        </div>
-                        {tree.tokenId != null && (
-                          <span
-                            className={`${mono} shrink-0 rounded-full bg-[#e7ebfc] px-2.5 py-1 text-[10px] font-extrabold text-[#3154D5]`}
-                          >
-                            #{tree.tokenId}
-                          </span>
-                        )}
-                      </div>
-
-                      {tree.projectId && (
-                        <p className="mt-1 text-sm text-[#667069]">
-                          {tree.projectId.name}
-                        </p>
+                      {tree.metadataCid && (
+                        // biome-ignore lint/performance/noImgElement: tree.metadataCid is an operator-controlled external gateway URL, not a local/optimizable asset
+                        <img
+                          src={tree.metadataCid}
+                          alt=""
+                          className="h-28 w-full object-cover"
+                        />
                       )}
+                      <div className="p-5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className={`${mono} text-xs text-[#929A94]`}>
+                              {tree.treeCode}
+                            </p>
+                            <h3 className="mt-1 text-lg font-extrabold tracking-[-0.03em] text-[#163D2A]">
+                              {tree.species}
+                            </h3>
+                          </div>
+                          {tree.tokenId != null && (
+                            <span
+                              className={`${mono} shrink-0 rounded-full bg-[#e7ebfc] px-2.5 py-1 text-[10px] font-extrabold text-[#3154D5]`}
+                            >
+                              #{tree.tokenId}
+                            </span>
+                          )}
+                        </div>
 
-                      <div className="mt-3">
-                        <TreeStatusPill status={tree.status} />
-                      </div>
+                        {tree.projectId && (
+                          <p className="mt-1 text-sm text-[#667069]">
+                            {tree.projectId.name}
+                          </p>
+                        )}
 
-                      <div className="mt-4 flex items-center justify-between border-t border-[#f1f3f1] pt-4">
-                        <p className="text-xs text-[#929A94]">
-                          {tree.currentHeightCm} cm tall
-                        </p>
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-[#246B45]">
-                          Passport
-                          <ArrowUpRight
-                            size={12}
-                            aria-hidden="true"
-                            className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                          />
-                        </span>
+                        <div className="mt-3">
+                          <TreeStatusPill status={tree.status} />
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between border-t border-[#f1f3f1] pt-4">
+                          <p className="text-xs text-[#929A94]">
+                            {tree.currentHeightCm} cm tall
+                          </p>
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-[#246B45]">
+                            Passport
+                            <ArrowUpRight
+                              size={12}
+                              aria-hidden="true"
+                              className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                            />
+                          </span>
+                        </div>
                       </div>
                     </Link>
                   </li>

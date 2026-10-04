@@ -131,6 +131,15 @@ export default async function TreePassportPage(
             {TREE_STATUS_LABEL[tree.status]}
           </span>
 
+          {tree.metadataCid && (
+            // biome-ignore lint/performance/noImgElement: tree.metadataCid is an operator-controlled external gateway URL, not a local/optimizable asset
+            <img
+              src={tree.metadataCid}
+              alt={`${tree.species} — ${tree.treeCode}`}
+              className="mt-6 h-64 w-full rounded-2xl border border-[#e2e7e2] object-cover"
+            />
+          )}
+
           <div className="mt-8 grid gap-6 sm:grid-cols-2">
             <section className="rounded-2xl border border-[#e2e7e2] bg-white p-6">
               <p className="text-xs font-extrabold tracking-[0.14em] text-[#667069]">

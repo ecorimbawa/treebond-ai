@@ -33,9 +33,18 @@ const isSponsorable = (tree: ExploreTree) =>
 function TreeCard({ tree }: { tree: ExploreTree }) {
   return (
     <article className="overflow-hidden rounded-2xl border border-[#e2e7e2] bg-white transition hover:-translate-y-0.5 hover:border-[#9ec6aa]">
-      <div className="grid h-40 place-items-center bg-[#F3F5F1]">
-        <Sprout size={32} className="text-[#9ec6aa]" aria-hidden="true" />
-      </div>
+      {tree.metadataCid ? (
+        // biome-ignore lint/performance/noImgElement: tree.metadataCid is an operator-controlled external gateway URL, not a local/optimizable asset
+        <img
+          src={tree.metadataCid}
+          alt=""
+          className="h-40 w-full object-cover"
+        />
+      ) : (
+        <div className="grid h-40 place-items-center bg-[#F3F5F1]">
+          <Sprout size={32} className="text-[#9ec6aa]" aria-hidden="true" />
+        </div>
+      )}
       <div className="p-5">
         <p className="font-[family-name:var(--font-geist-mono)] text-xs text-[#929A94]">
           {tree.treeCode}
