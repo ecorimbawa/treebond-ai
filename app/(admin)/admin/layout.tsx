@@ -7,7 +7,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-[#FAFAF7]">
       <RoleHeader
         audience="Admin"
-        links={[{ label: "Dashboard", href: "/admin" }]}
+        links={[
+          { label: "Dashboard", href: "/admin" },
+          { label: "Users", href: "/admin/users" },
+          { label: "Projects", href: "/admin/projects" },
+          { label: "Trees", href: "/admin/trees" },
+          { label: "Disputes", href: "/admin/disputes" },
+        ]}
       />
       {children}
     </div>
