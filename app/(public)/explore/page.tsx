@@ -1,7 +1,7 @@
 // @/app/(public)/explore/page.tsx
 "use client";
 
-import { ArrowRight, MapPin, Search, Sprout } from "lucide-react";
+import { ArrowRight, Blocks, MapPin, Search, Sprout } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Logo } from "@/components/Logo";
@@ -14,12 +14,21 @@ type ExploreTree = Omit<ITree, "projectId"> & {
   projectId: IProject | null;
 };
 
-const statusFilters: { value: TreeStatus | "all"; label: string }[] = [
+type FilterValue = TreeStatus | "all" | "sponsorable";
+
+const statusFilters: { value: FilterValue; label: string }[] = [
+  { value: "sponsorable", label: "Sponsorable now" },
   { value: "all", label: "All" },
   { value: "AVAILABLE", label: "Available" },
   { value: "MONITORING", label: "Monitoring" },
   { value: "SPONSORED", label: "Sponsored" },
 ];
+
+// A tree is only buyable once it exists on TreeRegistry — a Mongo-only tree
+// renders a passport with no price and no Sponsor button, which is a dead end
+// for anyone browsing to sponsor.
+const isSponsorable = (tree: ExploreTree) =>
+  tree.tokenId != null && tree.status === "AVAILABLE";
 
 function TreeCard({ tree }: { tree: ExploreTree }) {
   return (
@@ -43,8 +52,14 @@ function TreeCard({ tree }: { tree: ExploreTree }) {
         ) : (
           <p className="text-sm text-[#667069]">Unassigned project</p>
         )}
-        <div className="mt-3">
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <TreeStatusPill status={tree.status} />
+          {isSponsorable(tree) && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e7ebfc] px-2.5 py-1 text-[10px] font-extrabold text-[#3154D5]">
+              <Blocks size={11} aria-hidden="true" />
+              TOKEN #{tree.tokenId}
+            </span>
+          )}
         </div>
         <div className="my-4 border-t border-[#e2e7e2]" />
         <div className="flex items-center justify-between">
@@ -66,7 +81,7 @@ function TreeCard({ tree }: { tree: ExploreTree }) {
 export default function ExplorePage() {
   const [trees, setTrees] = useState<ExploreTree[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeStatus, setActiveStatus] = useState<TreeStatus | "all">("all");
+  const [activeStatus, setActiveStatus] = useState<FilterValue>("sponsorable");
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -90,7 +105,11 @@ export default function ExplorePage() {
     const q = query.trim().toLowerCase();
     return trees.filter((tree) => {
       const matchesStatus =
-        activeStatus === "all" || tree.status === activeStatus;
+        activeStatus === "all"
+          ? true
+          : activeStatus === "sponsorable"
+            ? isSponsorable(tree)
+            : tree.status === activeStatus;
       const matchesQuery =
         q.length === 0 ||
         tree.treeCode.toLowerCase().includes(q) ||
@@ -194,8 +213,10 @@ export default function ExplorePage() {
               <p className="mt-3 font-extrabold text-[#163D2A]">
                 No trees match your search
               </p>
-              <p className="mt-1 text-sm text-[#667069]">
-                Try a different status filter or search term.
+              <p className="mt-1 max-w-sm text-sm text-[#667069]">
+                {activeStatus === "sponsorable"
+                  ? "No tree is registered on-chain and available right now. Switch to All to browse the rest."
+                  : "Try a different status filter or search term."}
               </p>
             </div>
           )
