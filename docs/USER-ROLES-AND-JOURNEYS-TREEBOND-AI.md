@@ -109,19 +109,20 @@ Login (/login)
 ## 4. Verifier
 
 ### Cara jadi Verifier
-Sama seperti Operator — provisioning manual di MongoDB, lalu perlu `VERIFIER_ROLE` on-chain kalau suatu saat ada flow yang mensyaratkan wallet verifier sendiri bertransaksi (saat ini belum ada — lihat catatan di bagian Oracle).
+`node scripts/seed-demo-data.mjs` bikin `demo-verifier@treebond.seed` / `demo-seed-not-a-real-login`. Sejak Admin Feature Plan P1 selesai, bisa juga lewat `/admin/users` (admin ubah role user jadi verifier langsung di UI). Belum perlu `VERIFIER_ROLE` on-chain untuk apapun yang verifier lakukan saat ini — approve/reject murni Mongo, dan submit ke chain tetap tugas Oracle (lihat catatan di bagian Oracle).
 
 ### Journey (PRD §10)
 ```
-Login (/login)
+Login (/login) — otomatis diarahkan ke /verifier setelah sukses
   ↓
 /verifier — antrian: semua TreeEvidence berstatus "pending",
             lengkap dengan info tree-nya
   ↓
 Klik "Review" → /verifier/[verificationId]
+  (ada link "← Back to Queue")
   ↓
 Lihat evidence (tipe, foto CID, GPS, waktu) + hasil AI
-  (health/growth/anomaly score, model name)
+  (health/growth/anomaly score, model name, explanation)
   ↓
 Approve / Reject (wajib isi alasan)
     → POST /api/verifications/[id]/approve atau /reject
@@ -137,29 +138,43 @@ Kalau APPROVED → muncul form "Submit to Blockchain":
     → Verification.status jadi ON_CHAIN
 ```
 
+⚠️ Submit to Blockchain cuma berhasil kalau tree yang di-review **sudah punya `tokenId` asli** (diregister Operator on-chain) — kalau belum, Oracle route nolak dengan "Tree is not registered on-chain yet".
+
+⚠️ **Kedua halaman Verifier sekarang redirect tegas** ke `/login` kalau yang akses bukan sesi verifier (2026-10-04 — sebelumnya halaman review bisa diakses siapa aja yang tau ID evidence-nya, tanpa login sama sekali; cuma tombol approve/reject yang ter-proteksi, bukan tampilan datanya).
+
 ---
 
 ## 5. Admin
 
 ### Cara jadi Admin
-**Tidak ada self-service sama sekali, termasuk admin pertama** (chicken-and-egg: `/admin` butuh sudah jadi admin, tapi tidak ada admin pertama tanpa akses `/admin`). Butuh edit manual langsung ke MongoDB. Lihat `docs/GAP-ANALYSIS-TREEBOND-AI.md` Priority 1.
+Tidak ada self-service lewat UI, tapi sudah ada jalan keluar: `node scripts/seed-admin-user.mjs` bikin akun `demo-admin@treebond.seed` / `demo-seed-not-a-real-login` langsung di MongoDB (lihat `docs/GAP-ANALYSIS-TREEBOND-AI.md` Priority 1).
 
 ### Journey
 ```
-Login (/login)
+node scripts/seed-admin-user.mjs  (sekali saja)
+  ↓
+Login (/login) — otomatis diarahkan ke /admin setelah sukses
   ↓
 /admin — platform stats: users, projects, trees, sponsored,
          verifications, on-chain verifications, transaksi,
-         transaksi gagal (semua agregat dari MongoDB)
+         transaksi gagal (semua agregat dari MongoDB, read-only)
+  ↓
+Connect wallet sendiri (RainbowKit) — harus wallet yang beneran
+pegang DEFAULT_ADMIN_ROLE di TreeRegistry
   ↓
 Form "Grant On-Chain Role":
-    isi wallet address + pilih OPERATOR_ROLE atau VERIFIER_ROLE
-    → POST /api/admin/grant-role
-    → SERVER (bukan wallet admin sendiri) yang sign & kirim
-      grantRole() ke TreeRegistry pakai ADMIN_PRIVATE_KEY
+    isi wallet address target + pilih OPERATOR_ROLE atau VERIFIER_ROLE
+    → wallet admin SENDIRI yang sign & kirim grantRole() —
+      tidak ada server/private key yang terlibat (2026-10-04,
+      sebelumnya server-side via ADMIN_PRIVATE_KEY, sudah dieliminasi)
 ```
 
+⚠️ **Dua hal terpisah yang sering ketuker:** session admin (login MongoDB) cuma buka akses ke halaman `/admin`. Yang menentukan transaksi `grantRole()` berhasil atau revert adalah apakah **wallet yang di-connect** — bukan akun yang login — beneran pegang `DEFAULT_ADMIN_ROLE` di kontrak.
+
 ⚠️ Form ini **cuma bisa** grant `OPERATOR_ROLE`/`VERIFIER_ROLE` di kontrak `TreeRegistry`. Kalau butuh grant `ORACLE_ROLE` di `VerificationRegistry` (misal ganti wallet oracle), harus manual lewat script/Etherscan — belum ada UI-nya.
+
+### Yang belum bisa dilakukan Admin
+Nggak ada UI buat lihat/kelola daftar user, nggak ada handling dispute (status `DISPUTED` ada di enum Tree tapi nggak ada alur kerja untuk itu).
 
 ---
 

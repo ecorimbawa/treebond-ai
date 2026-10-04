@@ -6,17 +6,31 @@ Dibandingkan langsung ke `PRD.md` dan `BLUEPRINT-LANDING-PAGE-TREEBOND-AI.md` te
 
 ---
 
+## Audit Verifier (2026-10-04)
+
+- [x] ~~**Queue selalu kosong.**~~ **FIXED.** Ke-7 evidence dari seed data awal semuanya udah berstatus approved/rejected — nggak ada satupun yang `pending`, jadi `/verifier` selalu nunjukin "No evidence pending review" walau kodenya benar. `scripts/seed-pending-evidence.mjs` (baru) nambahin 2 evidence `pending` ke tree yang belum pernah disentuh.
+- [x] ~~**`/verifier/[verificationId]` nggak ada auth check sama sekali.**~~ **FIXED.** Siapapun yang tau/nebak ID evidence bisa liat detail evidence + AI analysis tanpa login, apalagi tanpa jadi verifier (tombol approve/reject tetap aman karena API-nya sudah ter-gate, tapi halaman VIEW-nya kebuka ke siapa aja). Ditambahkan redirect check yang sama kayak `/admin`.
+- [x] ~~Halaman queue (`/verifier`) juga nggak redirect non-verifier, cuma diem-diem nunjukin list kosong.~~ **FIXED** — sekarang konsisten redirect ke `/login` kayak halaman lain.
+- [x] Nambahin link "← Back to Queue" di halaman review (sebelumnya cuma bisa balik lewat RoleHeader, nggak ada inline link kayak halaman lain).
+
+---
+
 ## Priority 1 — Supaya app ini bisa benar-benar dipakai & didemo
 
 Tanpa ini, flow nggak bisa jalan sama sekali (bukan cuma "kurang mulus" — beneran mentok).
 
-- [ ] **Tidak ada jalan untuk bikin operator/verifier/admin pertama kali.** `POST /api/auth/register` selalu bikin `role: "sponsor"` (§47, memang disengaja), tapi tidak ada script buat promote user pertama jadi operator/verifier/admin. Tanpa ini, demo narrative §97 mentok di langkah pertama — nggak ada operator yang bisa bikin project/tree, nggak ada verifier yang bisa approve. **Ini blocker #1.**
-- [ ] `MONGODB_URI` masih `mongodb://localhost:27017/...` — kalau mau demo/deploy di luar laptop sendiri (Vercel dll), butuh MongoDB Atlas atau provider cloud lain.
-- [ ] `ORACLE_PRIVATE_KEY` kosong — tanpa ini, tombol "Submit to Blockchain" di verifier selalu gagal.
-- [ ] `ADMIN_PRIVATE_KEY` kosong — tanpa ini, tombol "Grant On-Chain Role" di admin selalu gagal (yang juga berarti operator/verifier baru nggak bisa benar-benar transaksi on-chain walau sudah di-promote di Mongo).
-- [ ] `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` kosong — tidak fatal (ada fallback demo ID dari RainbowKit), tapi isi kalau mau demo rapi.
+- [x] ~~**Tidak ada jalan untuk bikin operator/verifier/admin pertama kali.**~~ **FIXED (2026-10-03).** `scripts/seed-demo-data.mjs` sudah bikin user `demo-operator@treebond.seed` (role operator) dan `demo-verifier@treebond.seed` (role verifier); `scripts/seed-admin-user.mjs` (baru) bikin `demo-admin@treebond.seed` (role admin). Semua password `demo-seed-not-a-real-login`. Login sebagai operator/verifier/admin sekarang bisa langsung dicoba.
+- [x] ~~**`ADMIN_PRIVATE_KEY` kosong, bikin tombol "Grant On-Chain Role" selalu gagal.**~~ **DIELIMINASI (2026-10-04).** Server-side signing untuk `grantRole()` dihapus total — `GrantRoleForm` sekarang sign langsung dari wallet yang di-connect admin di browser (pola sama kayak Sponsor/Operator), persis kayak semua write action lain di app ini. Nggak ada lagi private key yang perlu disimpan di server untuk fitur ini. `ADMIN_PRIVATE_KEY` dihapus dari `.env.example`/`.env.local`, route `/api/admin/grant-role` dihapus (sudah nggak dipakai). Syaratnya cuma: wallet yang di-connect harus pegang `DEFAULT_ADMIN_ROLE` beneran di TreeRegistry.
+- [x] ~~`MONGODB_URI` masih `mongodb://localhost:27017/...`~~ **FIXED** — sudah diisi MongoDB Atlas.
+- [x] ~~`ORACLE_PRIVATE_KEY` kosong.~~ **FIXED (2026-10-04).** Diisi dan diverifikasi langsung ke live contract: format valid, address yang diturunkan cocok persis sama `0x71AF...8527F81`, saldo ~0.098 ETH (cukup buat gas), dan wallet ini beneran pegang `ORACLE_ROLE` di `VerificationRegistry` (dicek via `hasRole()` on-chain, bukan asumsi). Tombol "Submit to Blockchain" di Verifier sekarang siap jalan. **Ini tetap server-side (bukan dieliminasi kayak Admin)** karena memang desain PRD §34 — Oracle sengaja jadi identitas sistem terpisah dari verifier manapun, bukan keterbatasan teknis.
+- [x] ~~`NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` kosong.~~ **FIXED (2026-10-04).** Diisi project ID asli dari WalletConnect Cloud.
 
-**Rekomendasi konkret:** saya bisa buatkan `scripts/promote-user.mjs` (jalanin sekali lewat `node`, langsung update MongoDB) buat beresin poin pertama. Mau?
+**Priority 1 tuntas 100%.**
+
+- [x] ~~**Tree stuck di REGISTERED selamanya, nggak bisa jadi AVAILABLE.**~~ **FIXED (2026-10-03).** Transisi on-chain `REGISTERED → PENDING_VERIFICATION → VERIFIED → AVAILABLE` wajib lewat `updateTreeStatus()`, tapi nggak ada UI manapun yang manggil itu. Dibereskan dengan `components/operator/OperatorToolsPanel.tsx` di Tree Passport, kelihatan cuma buat wallet yang pegang `OPERATOR_ROLE`. Jalan pintas demo (skip gerbang approval Verifier di on-chain tree status), bukan wiring penuh sesuai PRD.
+- [x] ~~**Halaman upload evidence operator (`/operator/trees/[treeId]/evidence/new`) nggak ada link-nya dari manapun.**~~ **FIXED (2026-10-03).** Sama kayak bug `/projects/[projectId]` sebelumnya — halamannya jalan, cuma nggak ada jalur klik. Ditambahkan ke `OperatorToolsPanel` (link "Upload Monitoring Evidence", selalu kelihatan buat operator terlepas dari status tree).
+- [x] ~~**`/operator/projects` nggak ada link ke halaman detail project publik.**~~ **FIXED (2026-10-03).** Operator sekarang nggak punya jalan balik ke daftar tree existing di project mereka. Nama project di list sekarang link ke `/projects/[projectId]`.
+- [x] ~~**Landing page nggak ada link ke `/login` sama sekali, DAN login selalu redirect ke `/dashboard` apapun role-nya.**~~ **FIXED (2026-10-04).** Dua masalah ketemu bareng pas nelusurin jalur landing page → Admin: (1) landing page (`app/(public)/page.tsx`) nggak punya link "Log In" di manapun — cuma Explore page yang punya; (2) lebih parah, `app/(auth)/login/page.tsx` hardcode `router.push("/dashboard")` abis login sukses, **berlaku untuk semua role**, jadi operator/verifier/admin yang baru login tetap didorong ke halaman Sponsor yang nggak relevan buat mereka. Dibereskan dengan baca `session.user.role` lewat `getSession()` abis sign-in, redirect ke home masing-masing role (`/operator`, `/verifier`, `/admin`, fallback `/dashboard` buat sponsor).
 
 ---
 
