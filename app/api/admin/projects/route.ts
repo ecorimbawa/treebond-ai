@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/db/connection";
-import { Project, User } from "@/models";
+import { Project } from "@/models";
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,74 +44,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-const createSchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1),
-  description: z.string().min(1),
-  country: z.string().min(1),
-  province: z.string().min(1),
-  regency: z.string().min(1),
-  village: z.string().min(1),
-  latitude: z.coerce.number(),
-  longitude: z.coerce.number(),
-  areaHectares: z.coerce.number().positive(),
-  targetTreeCount: z.coerce.number().int().positive(),
-  createdBy: z.string().min(1),
-});
-
-export async function POST(request: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json(
-        { success: false, error: "Admin session required" },
-        { status: 401 },
-      );
-    }
-
-    await connectDB();
-    const parsed = createSchema.safeParse(await request.json());
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid payload",
-          issues: parsed.error.issues,
-        },
-        { status: 400 },
-      );
-    }
-
-    const operator = await User.findById(parsed.data.createdBy);
-    if (!operator || operator.role !== "operator") {
-      return NextResponse.json(
-        { success: false, error: "createdBy must be an existing operator" },
-        { status: 400 },
-      );
-    }
-
-    const existingSlug = await Project.findOne({
-      slug: parsed.data.slug.toLowerCase(),
-    });
-    if (existingSlug) {
-      return NextResponse.json(
-        { success: false, error: "A project with this slug already exists" },
-        { status: 409 },
-      );
-    }
-
-    const project = await Project.create({
-      ...parsed.data,
-      slug: parsed.data.slug.toLowerCase(),
-      status: "active",
-    });
-
-    return NextResponse.json({ success: true, data: project }, { status: 201 });
-  } catch (error) {
-    console.error("POST /api/admin/projects error:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create project" },
-      { status: 500 },
-    );
-  }
-}
+// Deliberately read-only — project creation requires a real createProject()
+// transaction on TreeRegistry (see /operator/projects/new); anything created
+// from here would be permanently stuck "NOT ON-CHAIN".

@@ -1,9 +1,10 @@
 // @/app/admin/users/page.tsx
-
+import { KeyRound } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminUsersTable } from "@/components/admin/AdminUsersTable";
+import { AdminMain, Callout, PageHeader } from "@/components/admin/ui";
 
 export default async function AdminUsersPage() {
   const session = await auth();
@@ -12,28 +13,34 @@ export default async function AdminUsersPage() {
   }
 
   return (
-    <main className="mx-auto max-w-[1000px] px-5 py-12">
-      <p className="text-xs font-extrabold tracking-[0.16em] text-[#B7791F]">
-        ADMIN · USERS
-      </p>
-      <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[#163D2A]">
-        User Management
-      </h1>
-      <p className="mt-2 max-w-2xl text-sm text-[#667069]">
-        Changing a role here only updates MongoDB. Operators and verifiers also
-        need their wallet granted the matching on-chain role from the{" "}
-        <Link
-          href="/admin"
-          className="font-bold text-[#246B45] hover:underline"
+    <AdminMain>
+      <PageHeader
+        eyebrow="ADMIN · USERS"
+        title="User Management"
+        description="Every account on the platform — create new ones, correct names and emails, and move people between sponsor, operator, verifier and admin."
+      />
+
+      <div className="mt-8 max-w-3xl">
+        <Callout
+          tone="chain"
+          icon={<KeyRound size={16} aria-hidden="true" />}
+          title="App roles aren't on-chain roles"
         >
-          Grant Role
-        </Link>{" "}
-        form before they can actually transact as that role.
-      </p>
+          Changing a role here only updates MongoDB. Operators and verifiers
+          also need their wallet granted the matching on-chain role from the{" "}
+          <Link
+            href="/admin"
+            className="font-bold underline decoration-2 underline-offset-2"
+          >
+            Grant Role
+          </Link>{" "}
+          form before they can actually transact as that role.
+        </Callout>
+      </div>
 
       <div className="mt-8">
         <AdminUsersTable currentUserId={session.user.id} />
       </div>
-    </main>
+    </AdminMain>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { KeyRound, TriangleAlert, Wallet } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { useAccount } from "wagmi";
+import { buttonClass, Field, mono, SelectField } from "@/components/admin/ui";
 import { useEnsureArbitrumSepolia } from "@/hooks";
 import { useGrantRole } from "@/hooks/write/use-grant-role";
 import { useRevokeRole } from "@/hooks/write/use-revoke-role";
@@ -10,6 +12,11 @@ import { getContractErrorMessage } from "@/lib/web3/errors";
 import { OPERATOR_ROLE, VERIFIER_ROLE } from "@/lib/web3/roles";
 
 const ROLE_HASH = { OPERATOR_ROLE, VERIFIER_ROLE } as const;
+
+// White card on the dashboard's dark panel, same treatment as the landing
+// page's Tree Passport card — this form is the visual anchor of that section.
+const CARD =
+  "rounded-2xl border border-white/20 bg-white p-6 shadow-[0_20px_50px_rgba(22,61,42,.18)]";
 
 // Signed by whichever wallet the admin connects here, not a server-held key
 // — same client-side pattern as sponsor/operator writes. Only works if that
@@ -64,69 +71,103 @@ export function GrantRoleForm() {
 
   if (!isConnected) {
     return (
-      <div className="rounded-2xl border border-[#e2e7e2] bg-white p-6">
-        <p className="mb-4 text-sm text-[#667069]">
+      <div className={CARD}>
+        <span className="grid size-10 place-items-center rounded-xl bg-[#F3F5F1] text-[#246B45]">
+          <Wallet size={18} aria-hidden="true" />
+        </span>
+        <p className="mt-4 text-sm font-extrabold text-[#163D2A]">
+          Wallet not connected
+        </p>
+        <p className="mt-1 text-sm leading-6 text-[#667069]">
           Connect the wallet that holds <code>DEFAULT_ADMIN_ROLE</code> to grant
           or revoke roles.
         </p>
-        <ConnectButton />
+        <div className="mt-5">
+          <ConnectButton />
+        </div>
       </div>
     );
   }
 
   if (wrongChain) {
     return (
-      <button
-        type="button"
-        onClick={switchToArbitrumSepolia}
-        disabled={isSwitching}
-        className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#B3402F] px-4 text-sm font-bold text-white disabled:opacity-60"
-      >
-        {isSwitching ? "Switching…" : "Switch to Arbitrum Sepolia"}
-      </button>
+      <div className={CARD}>
+        <span className="grid size-10 place-items-center rounded-xl bg-[#F7E1DE] text-[#B3402F]">
+          <TriangleAlert size={18} aria-hidden="true" />
+        </span>
+        <p className="mt-4 text-sm font-extrabold text-[#163D2A]">
+          Wrong network
+        </p>
+        <p className="mt-1 text-sm leading-6 text-[#667069]">
+          TreeRegistry only exists on Arbitrum Sepolia. Switch networks before
+          signing anything.
+        </p>
+        <button
+          type="button"
+          onClick={switchToArbitrumSepolia}
+          disabled={isSwitching}
+          className={`mt-5 w-full ${buttonClass("primary")}`}
+        >
+          {isSwitching ? "Switching…" : "Switch to Arbitrum Sepolia"}
+        </button>
+      </div>
     );
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-2xl border border-[#e2e7e2] bg-white p-6"
-    >
-      <label className="block text-sm" htmlFor="walletAddress">
-        <span className="font-bold text-[#163D2A]">Wallet address</span>
-        <input
-          id="walletAddress"
+    <form onSubmit={handleSubmit} className={CARD}>
+      <div className="flex items-center gap-3">
+        <span className="grid size-10 place-items-center rounded-xl bg-[#DDEEE3] text-[#246B45]">
+          <KeyRound size={18} aria-hidden="true" />
+        </span>
+        <div>
+          <p className="text-sm font-extrabold text-[#163D2A]">
+            Grant or revoke
+          </p>
+          <p className="text-[11px] text-[#929A94]">
+            Signed from your connected wallet
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-4">
+        <Field
+          label="Wallet address"
           name="walletAddress"
           placeholder="0x..."
           required
           pattern="^0x[a-fA-F0-9]{40}$"
-          className="mt-1.5 w-full rounded-xl border border-[#d9e2da] px-3 py-2 text-sm outline-none focus:border-[#246B45]"
+          hint="42 characters, including the 0x prefix"
         />
-      </label>
-      <label className="mt-4 block text-sm" htmlFor="role">
-        <span className="font-bold text-[#163D2A]">Role (on TreeRegistry)</span>
-        <select
-          id="role"
-          name="role"
-          className="mt-1.5 w-full rounded-xl border border-[#d9e2da] bg-white px-3 py-2 text-sm outline-none focus:border-[#246B45]"
-        >
+        <SelectField label="Role (on TreeRegistry)" name="role">
           <option value="OPERATOR_ROLE">OPERATOR_ROLE</option>
           <option value="VERIFIER_ROLE">VERIFIER_ROLE</option>
-        </select>
-      </label>
+        </SelectField>
+      </div>
 
-      {error && <p className="mt-3 text-sm text-[#B3402F]">{error}</p>}
+      {error && (
+        <p
+          role="alert"
+          className="mt-4 rounded-xl bg-[#F7E1DE] px-3 py-2 text-sm font-semibold text-[#B3402F]"
+        >
+          {error}
+        </p>
+      )}
       {result && (
-        <p className="mt-3 break-all text-sm text-[#246B45]">{result}</p>
+        <p
+          className={`${mono} mt-4 break-all rounded-xl bg-[#DDEEE3] px-3 py-2 text-xs leading-5 text-[#246B45]`}
+        >
+          {result}
+        </p>
       )}
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-5 flex gap-2">
         <button
           type="submit"
           name="action"
           value="grant"
           disabled={isBusy}
-          className="inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className={`flex-1 ${buttonClass("primary")}`}
         >
           {isGrantPending
             ? "Confirm in wallet…"
@@ -139,7 +180,7 @@ export function GrantRoleForm() {
           name="action"
           value="revoke"
           disabled={isBusy}
-          className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-[#B3402F] px-4 text-sm font-bold text-[#B3402F] disabled:cursor-not-allowed disabled:opacity-50"
+          className={`flex-1 ${buttonClass("danger")}`}
         >
           {isRevokePending
             ? "Confirm in wallet…"

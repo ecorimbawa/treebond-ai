@@ -1,7 +1,9 @@
 // @/app/admin/projects/page.tsx
+import { Blocks } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminProjectsTable } from "@/components/admin/AdminProjectsTable";
+import { AdminMain, Callout, PageHeader } from "@/components/admin/ui";
 
 export default async function AdminProjectsPage() {
   const session = await auth();
@@ -10,21 +12,30 @@ export default async function AdminProjectsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-[1100px] px-5 py-12">
-      <p className="text-xs font-extrabold tracking-[0.16em] text-[#B7791F]">
-        ADMIN · PROJECTS
-      </p>
-      <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[#163D2A]">
-        All Projects
-      </h1>
-      <p className="mt-2 max-w-2xl text-sm text-[#667069]">
-        Every project on the platform, regardless of which operator created it.
-        Open a project for its full public detail page.
-      </p>
+    <AdminMain>
+      <PageHeader
+        eyebrow="ADMIN · PROJECTS"
+        title="All Projects"
+        description="Every project on the platform, regardless of which operator created it. Open a project for its full public detail page."
+      />
+
+      <div className="mt-8 max-w-3xl">
+        <Callout
+          tone="chain"
+          icon={<Blocks size={16} aria-hidden="true" />}
+          title="Read-only by design"
+        >
+          Creating a project needs a real <code>createProject()</code>{" "}
+          transaction on TreeRegistry, which operators sign from{" "}
+          <code>/operator/projects/new</code>. Anything authored here would be
+          permanently stuck &ldquo;NOT ON-CHAIN&rdquo;, so admin&rsquo;s job for
+          projects is oversight, not authoring.
+        </Callout>
+      </div>
 
       <div className="mt-8">
         <AdminProjectsTable />
       </div>
-    </main>
+    </AdminMain>
   );
 }

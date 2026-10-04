@@ -26,6 +26,7 @@ Kondisi awal (sebelum dokumen ini dieksekusi): `/admin` cuma py 2 hal — lihat 
 - [x] `GET /api/admin/projects` — list SEMUA project platform-wide (beda dari `/api/projects` yang publik tapi juga beda dari `/operator/projects` yang scoped ke satu operator)
 - [x] `GET /api/admin/trees` — list semua tree platform-wide, filter by status/project/operator. Operator di-resolve lewat `Project.createdBy` (Tree sendiri nggak punya field operator) — kalau `projectId` dan `operatorId` dua-duanya dikirim, hasilnya interseksi, bukan union
 - [x] UI: halaman terpisah (`/admin/projects`, `/admin/trees`) linking ke halaman publik yang sudah ada (`/projects/[id]`, `/trees/[id]`) buat detail. `/admin/trees` juga punya filter dropdown status/project/operator
+- [x] **Projects sempat dikasih full CRUD, lalu sengaja ditarik balik jadi read-only (2026-10-04).** Create/Edit/Delete project dari admin dihapus total (UI maupun route `POST`/`PATCH`/`DELETE` di `/api/admin/projects*`) — project yang dibuat dari situ nggak pernah lewat `createProject()` on-chain, jadi bakal stuck selamanya "NOT ON-CHAIN". Pembuatan project tetap satu-satunya jalur: `/operator/projects/new`, yang emang udah include langkah on-chain-nya. Trees tetap full CRUD (create tree dari admin masih masuk akal — sama kayak draft tree dari operator, memang belum tentu langsung on-chain, operator yang nerusin `registerTree()`-nya).
 
 ---
 

@@ -1,7 +1,26 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Pencil, Plus, Trash2, Users, X } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
+import {
+  buttonClass,
+  cellClass,
+  controlClass,
+  ErrorBanner,
+  Field,
+  FilterSelect,
+  FormPanel,
+  Pagination,
+  Pill,
+  rowClass,
+  SelectField,
+  Table,
+  TableCard,
+  TableEmpty,
+  TableSkeleton,
+  Th,
+  Thead,
+} from "@/components/admin/ui";
 import type { UserRole } from "@/models";
 
 type AdminUser = {
@@ -12,7 +31,7 @@ type AdminUser = {
   createdAt: string;
 };
 
-type Pagination = {
+type PaginationState = {
   total: number;
   limit: number;
   skip: number;
@@ -21,11 +40,13 @@ type Pagination = {
 
 const ROLES: UserRole[] = ["sponsor", "operator", "verifier", "admin"];
 const LIMIT = 20;
+const COLUMNS = 5;
 
 export function AdminUsersTable({ currentUserId }: { currentUserId: string }) {
   const [users, setUsers] = useState<AdminUser[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [pagination, setPagination] = useState<PaginationState | null>(null);
   const [skip, setSkip] = useState(0);
+  const [role, setRole] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -38,7 +59,13 @@ export function AdminUsersTable({ currentUserId }: { currentUserId: string }) {
     let cancelled = false;
     setIsLoading(true);
 
-    fetch(`/api/admin/users?limit=${LIMIT}&skip=${skip}`)
+    const params = new URLSearchParams({
+      limit: String(LIMIT),
+      skip: String(skip),
+    });
+    if (role) params.set("role", role);
+
+    fetch(`/api/admin/users?${params.toString()}`)
       .then((res) => res.json())
       .then((json) => {
         if (cancelled) return;
@@ -59,16 +86,16 @@ export function AdminUsersTable({ currentUserId }: { currentUserId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [skip, reloadToken]);
+  }, [skip, role, reloadToken]);
 
-  async function handleRoleChange(id: string, role: UserRole) {
+  async function handleRoleChange(id: string, nextRole: UserRole) {
     setPendingId(id);
     setError(null);
     try {
       const res = await fetch(`/api/admin/users/${id}/role`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
+        body: JSON.stringify({ role: nextRole }),
       });
       const json = await res.json();
       if (!json.success) {
@@ -125,7 +152,10 @@ export function AdminUsersTable({ currentUserId }: { currentUserId: string }) {
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    const form = new FormData(event.currentTarget);
+    // Grab the element before awaiting — React nulls currentTarget once the
+    // handler yields, so a post-await reset() would throw into the catch.
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     try {
       const res = await fetch("/api/admin/users", {
         method: "POST",
@@ -139,10 +169,10 @@ export function AdminUsersTable({ currentUserId }: { currentUserId: string }) {
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error ?? "Failed to create user");
+      formElement.reset();
       setIsCreating(false);
       setSkip(0);
       setReloadToken((t) => t + 1);
-      event.currentTarget.reset();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create user");
     }
@@ -150,95 +180,126 @@ export function AdminUsersTable({ currentUserId }: { currentUserId: string }) {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => setIsCreating((v) => !v)}
-          className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white hover:bg-[#163D2A]"
-        >
-          <Plus size={16} aria-hidden="true" />
-          New User
-        </button>
-      </div>
+      {error && <ErrorBanner>{error}</ErrorBanner>}
 
       {isCreating && (
-        <form
+        <FormPanel
+          title="New user"
+          description="Creates a MongoDB account straight away — no email verification, no invite flow."
           onSubmit={handleCreate}
-          className="mb-4 grid gap-3 rounded-2xl border border-[#e2e7e2] bg-white p-5 sm:grid-cols-2"
+          onCancel={() => setIsCreating(false)}
+          submitLabel="Create User"
         >
           <Field label="Full name" name="fullName" required />
           <Field label="Email" name="email" type="email" required />
-          <Field label="Password" name="password" type="password" required />
-          <label className="block text-sm" htmlFor="new-user-role">
-            <span className="font-bold text-[#163D2A]">Role</span>
-            <select
-              id="new-user-role"
-              name="role"
-              defaultValue="sponsor"
-              className="mt-1.5 w-full rounded-xl border border-[#d9e2da] bg-white px-3 py-2 text-sm outline-none focus:border-[#246B45]"
-            >
-              {ROLES.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="sm:col-span-2">
-            <button
-              type="submit"
-              className="inline-flex h-10 items-center rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white hover:bg-[#163D2A]"
-            >
-              Create User
-            </button>
-          </div>
-        </form>
+          <Field
+            label="Password"
+            name="password"
+            type="password"
+            required
+            hint="They can't change this themselves yet"
+          />
+          <SelectField label="Role" name="role" defaultValue="sponsor">
+            {ROLES.map((roleOption) => (
+              <option key={roleOption} value={roleOption}>
+                {roleOption}
+              </option>
+            ))}
+          </SelectField>
+        </FormPanel>
       )}
 
-      {error && <p className="mb-3 text-sm text-[#B3402F]">{error}</p>}
-
-      <div className="overflow-hidden rounded-2xl border border-[#e2e7e2] bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-[#e2e7e2] bg-[#FAFAF7]">
-            <tr>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Name</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Email</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Role</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Joined</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#e2e7e2]">
-            {isLoading ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-5 py-8 text-center text-[#929A94]"
-                >
-                  Loading…
-                </td>
-              </tr>
-            ) : users.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-5 py-8 text-center text-[#929A94]"
-                >
-                  No users found
-                </td>
-              </tr>
-            ) : (
-              users.map((user) => {
-                const isSelf = user._id === currentUserId;
-                const isEditing = editingId === user._id;
-                return (
+      <TableCard
+        title="Accounts"
+        meta={
+          pagination
+            ? `${pagination.total} account${pagination.total === 1 ? "" : "s"}${role ? ` with role ${role}` : " across all roles"}`
+            : "Loading…"
+        }
+        actions={
+          <>
+            <FilterSelect
+              label="Filter by role"
+              value={role}
+              onChange={(value) => {
+                setRole(value);
+                setSkip(0);
+              }}
+            >
+              <option value="">All roles</option>
+              {ROLES.map((roleOption) => (
+                <option key={roleOption} value={roleOption}>
+                  {roleOption}
+                </option>
+              ))}
+            </FilterSelect>
+            <button
+              type="button"
+              onClick={() => setIsCreating((v) => !v)}
+              className={buttonClass(
+                isCreating ? "secondary" : "primary",
+                "sm",
+              )}
+            >
+              {isCreating ? (
+                <X size={14} aria-hidden="true" />
+              ) : (
+                <Plus size={14} aria-hidden="true" />
+              )}
+              {isCreating ? "Close form" : "New User"}
+            </button>
+          </>
+        }
+        footer={
+          pagination ? (
+            <Pagination
+              noun="users"
+              skip={skip}
+              limit={LIMIT}
+              total={pagination.total}
+              hasMore={pagination.hasMore}
+              onPrev={() => setSkip((s) => Math.max(0, s - LIMIT))}
+              onNext={() => setSkip((s) => s + LIMIT)}
+            />
+          ) : undefined
+        }
+      >
+        <Table>
+          <Thead>
+            <Th>Member</Th>
+            <Th>Email</Th>
+            <Th>Role</Th>
+            <Th>Joined</Th>
+            <Th align="right" srOnly>
+              Actions
+            </Th>
+          </Thead>
+          {isLoading ? (
+            <TableSkeleton columns={COLUMNS} />
+          ) : (
+            <tbody className="divide-y divide-[#e2e7e2]">
+              {users.length === 0 ? (
+                <TableEmpty
+                  colSpan={COLUMNS}
+                  icon={<Users size={20} aria-hidden="true" />}
+                  title="No users found"
+                  hint={
+                    role
+                      ? `Nobody currently holds the ${role} role.`
+                      : "Create the first account to get started."
+                  }
+                />
+              ) : (
+                users.map((user) => (
                   <UserRow
                     key={user._id}
                     user={user}
-                    isSelf={isSelf}
-                    isEditing={isEditing}
+                    isSelf={user._id === currentUserId}
+                    isEditing={editingId === user._id}
                     isPending={pendingId === user._id}
-                    onRoleChange={(role) => handleRoleChange(user._id, role)}
+                    onRoleChange={(nextRole) =>
+                      handleRoleChange(user._id, nextRole)
+                    }
                     onStartEdit={() => setEditingId(user._id)}
                     onCancelEdit={() => setEditingId(null)}
                     onSave={(fullName, email) =>
@@ -246,40 +307,12 @@ export function AdminUsersTable({ currentUserId }: { currentUserId: string }) {
                     }
                     onDelete={() => handleDelete(user._id)}
                   />
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {pagination && (
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <p className="text-[#929A94]">
-            {pagination.total === 0
-              ? "0 users"
-              : `${skip + 1}–${Math.min(skip + LIMIT, pagination.total)} of ${pagination.total}`}
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setSkip((s) => Math.max(0, s - LIMIT))}
-              disabled={skip === 0}
-              className="rounded-lg border border-[#d9e2da] px-3 py-1.5 font-bold text-[#163D2A] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              onClick={() => setSkip((s) => s + LIMIT)}
-              disabled={!pagination.hasMore}
-              className="rounded-lg border border-[#d9e2da] px-3 py-1.5 font-bold text-[#163D2A] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+                ))
+              )}
+            </tbody>
+          )}
+        </Table>
+      </TableCard>
     </div>
   );
 }
@@ -307,42 +340,39 @@ function UserRow({
 }) {
   const [fullName, setFullName] = useState(user.fullName);
   const [email, setEmail] = useState(user.email);
+  const joined = new Date(user.createdAt).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 
   if (isEditing) {
     return (
-      <tr>
-        <td className="px-5 py-3">
-          <input
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="w-full rounded-lg border border-[#d9e2da] px-2 py-1.5 text-sm outline-none focus:border-[#246B45]"
-          />
+      <tr className="bg-[#FAFAF7]">
+        <td className="px-5 py-4 align-middle">
+          <Field label="Full name" value={fullName} onChange={setFullName} />
         </td>
-        <td className="px-5 py-3">
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-[#d9e2da] px-2 py-1.5 text-sm outline-none focus:border-[#246B45]"
-          />
+        <td className="px-5 py-4 align-middle">
+          <Field label="Email" type="email" value={email} onChange={setEmail} />
         </td>
-        <td className="px-5 py-3 text-[#929A94]">{user.role}</td>
-        <td className="px-5 py-3 text-[#667069]">
-          {new Date(user.createdAt).toLocaleDateString()}
+        <td className={cellClass}>
+          <Pill tone="muted">{user.role.toUpperCase()}</Pill>
         </td>
-        <td className="px-5 py-3">
-          <div className="flex gap-2">
+        <td className={cellClass}>{joined}</td>
+        <td className="px-5 py-4 text-right align-middle">
+          <div className="flex justify-end gap-2">
             <button
               type="button"
               disabled={isPending}
               onClick={() => onSave(fullName, email)}
-              className="rounded-lg bg-[#246B45] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+              className={buttonClass("primary", "sm")}
             >
-              Save
+              {isPending ? "Saving…" : "Save"}
             </button>
             <button
               type="button"
               onClick={onCancelEdit}
-              className="rounded-lg border border-[#d9e2da] px-3 py-1.5 text-xs font-bold text-[#163D2A]"
+              className={buttonClass("secondary", "sm")}
             >
               Cancel
             </button>
@@ -353,38 +383,53 @@ function UserRow({
   }
 
   return (
-    <tr>
-      <td className="px-5 py-3 font-bold text-[#163D2A]">
-        {user.fullName}
-        {isSelf && (
-          <span className="ml-1.5 text-xs font-bold text-[#929A94]">(you)</span>
-        )}
+    <tr className={rowClass}>
+      <td className="px-5 py-4 align-middle">
+        <div className="flex items-center gap-3">
+          <span
+            className="grid size-9 shrink-0 place-items-center rounded-full bg-[#DDEEE3] text-xs font-extrabold text-[#246B45]"
+            aria-hidden="true"
+          >
+            {user.fullName.trim().charAt(0).toUpperCase()}
+          </span>
+          <div>
+            <p className="font-bold text-[#163D2A]">{user.fullName}</p>
+            {isSelf && (
+              <p className="text-[11px] font-bold text-[#929A94]">
+                That&rsquo;s you
+              </p>
+            )}
+          </div>
+        </div>
       </td>
-      <td className="px-5 py-3 text-[#667069]">{user.email}</td>
-      <td className="px-5 py-3">
+      <td className={cellClass}>{user.email}</td>
+      <td className="px-5 py-4 align-middle">
         <select
           value={user.role}
+          aria-label={`Role for ${user.fullName}`}
           disabled={isSelf || isPending}
           onChange={(e) => onRoleChange(e.target.value as UserRole)}
-          className="rounded-lg border border-[#d9e2da] bg-white px-2 py-1.5 text-sm outline-none focus:border-[#246B45] disabled:cursor-not-allowed disabled:opacity-50"
+          className={controlClass("sm", "auto")}
+          title={
+            isSelf ? "You can't change your own role" : "Updates MongoDB only"
+          }
         >
-          {ROLES.map((role) => (
-            <option key={role} value={role}>
-              {role}
+          {ROLES.map((roleOption) => (
+            <option key={roleOption} value={roleOption}>
+              {roleOption}
             </option>
           ))}
         </select>
       </td>
-      <td className="px-5 py-3 text-[#667069]">
-        {new Date(user.createdAt).toLocaleDateString()}
-      </td>
-      <td className="px-5 py-3">
-        <div className="flex gap-3">
+      <td className={cellClass}>{joined}</td>
+      <td className="px-5 py-4 text-right align-middle">
+        <div className="flex justify-end gap-2">
           <button
             type="button"
             onClick={onStartEdit}
-            className="text-xs font-bold text-[#246B45] hover:underline"
+            className={buttonClass("secondary", "sm")}
           >
+            <Pencil size={13} aria-hidden="true" />
             Edit
           </button>
           {!isSelf && (
@@ -392,38 +437,14 @@ function UserRow({
               type="button"
               disabled={isPending}
               onClick={onDelete}
-              className="text-xs font-bold text-[#B3402F] hover:underline disabled:opacity-50"
+              aria-label={`Delete ${user.fullName}`}
+              className={buttonClass("danger", "sm")}
             >
-              Delete
+              <Trash2 size={13} aria-hidden="true" />
             </button>
           )}
         </div>
       </td>
     </tr>
-  );
-}
-
-function Field({
-  label,
-  name,
-  type = "text",
-  required,
-}: {
-  label: string;
-  name: string;
-  type?: string;
-  required?: boolean;
-}) {
-  return (
-    <label className="block text-sm" htmlFor={name}>
-      <span className="font-bold text-[#163D2A]">{label}</span>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        required={required}
-        className="mt-1.5 w-full rounded-xl border border-[#d9e2da] px-3 py-2 text-sm outline-none focus:border-[#246B45]"
-      />
-    </label>
   );
 }

@@ -1,8 +1,27 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Pencil, Plus, Sprout, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
+import {
+  buttonClass,
+  cellClass,
+  ErrorBanner,
+  Field,
+  FilterSelect,
+  FormPanel,
+  mono,
+  Pagination,
+  Pill,
+  rowClass,
+  SelectField,
+  Table,
+  TableCard,
+  TableEmpty,
+  TableSkeleton,
+  Th,
+  Thead,
+} from "@/components/admin/ui";
 import { TreeStatusPill } from "@/components/tree/TreeStatusPill";
 import { TREE_STATUS_LABEL } from "@/lib/tree-status";
 import type { ITree, TreeStatus } from "@/models";
@@ -21,7 +40,7 @@ type AdminTree = Omit<ITree, "projectId"> & {
 type ProjectOption = { _id: string; name: string };
 type OperatorOption = { _id: string; fullName: string };
 
-type Pagination = {
+type PaginationState = {
   total: number;
   limit: number;
   skip: number;
@@ -29,6 +48,7 @@ type Pagination = {
 };
 
 const LIMIT = 20;
+const COLUMNS = 6;
 const STATUS_OPTIONS = Object.entries(TREE_STATUS_LABEL) as [
   TreeStatus,
   string,
@@ -40,7 +60,7 @@ function toDateInputValue(value: string | Date) {
 
 export function AdminTreesTable() {
   const [trees, setTrees] = useState<AdminTree[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [pagination, setPagination] = useState<PaginationState | null>(null);
   const [skip, setSkip] = useState(0);
   const [status, setStatus] = useState("");
   const [projectId, setProjectId] = useState("");
@@ -53,6 +73,8 @@ export function AdminTreesTable() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const hasFilters = Boolean(status || projectId || operatorId);
 
   useEffect(() => {
     fetch("/api/admin/projects?limit=100")
@@ -108,10 +130,20 @@ export function AdminTreesTable() {
     setSkip(0);
   }
 
+  function clearFilters() {
+    setStatus("");
+    setProjectId("");
+    setOperatorId("");
+    setSkip(0);
+  }
+
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    const form = new FormData(event.currentTarget);
+    // Grab the element before awaiting — React nulls currentTarget once the
+    // handler yields, so a post-await reset() would throw into the catch.
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     try {
       const res = await fetch("/api/admin/trees", {
         method: "POST",
@@ -120,10 +152,10 @@ export function AdminTreesTable() {
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error ?? "Failed to create tree");
+      formElement.reset();
       setIsCreating(false);
       setSkip(0);
       setReloadToken((t) => t + 1);
-      event.currentTarget.reset();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create tree");
     }
@@ -169,79 +201,24 @@ export function AdminTreesTable() {
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-3">
-          <select
-            value={status}
-            onChange={(e) => handleFilterChange(setStatus, e.target.value)}
-            className="rounded-lg border border-[#d9e2da] bg-white px-3 py-2 text-sm outline-none focus:border-[#246B45]"
-          >
-            <option value="">All statuses</option>
-            {STATUS_OPTIONS.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+      {error && <ErrorBanner>{error}</ErrorBanner>}
 
-          <select
-            value={projectId}
-            onChange={(e) => handleFilterChange(setProjectId, e.target.value)}
-            className="rounded-lg border border-[#d9e2da] bg-white px-3 py-2 text-sm outline-none focus:border-[#246B45]"
-          >
-            <option value="">All projects</option>
+      {isCreating && (
+        <FormPanel
+          title="New tree"
+          description="Registers the tree in MongoDB only. An operator still has to sign registerTree() before it exists on-chain."
+          onSubmit={handleCreate}
+          onCancel={() => setIsCreating(false)}
+          submitLabel="Create Tree"
+        >
+          <SelectField label="Project" name="projectId" required>
+            <option value="">Select project…</option>
             {projectOptions.map((project) => (
               <option key={project._id} value={project._id}>
                 {project.name}
               </option>
             ))}
-          </select>
-
-          <select
-            value={operatorId}
-            onChange={(e) => handleFilterChange(setOperatorId, e.target.value)}
-            className="rounded-lg border border-[#d9e2da] bg-white px-3 py-2 text-sm outline-none focus:border-[#246B45]"
-          >
-            <option value="">All operators</option>
-            {operatorOptions.map((operator) => (
-              <option key={operator._id} value={operator._id}>
-                {operator.fullName}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setIsCreating((v) => !v)}
-          className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white hover:bg-[#163D2A]"
-        >
-          <Plus size={16} aria-hidden="true" />
-          New Tree
-        </button>
-      </div>
-
-      {isCreating && (
-        <form
-          onSubmit={handleCreate}
-          className="mb-4 grid gap-3 rounded-2xl border border-[#e2e7e2] bg-white p-5 sm:grid-cols-2"
-        >
-          <label className="block text-sm" htmlFor="new-tree-project">
-            <span className="font-bold text-[#163D2A]">Project</span>
-            <select
-              id="new-tree-project"
-              name="projectId"
-              required
-              className="mt-1.5 w-full rounded-xl border border-[#d9e2da] bg-white px-3 py-2 text-sm outline-none focus:border-[#246B45]"
-            >
-              <option value="">Select project…</option>
-              {projectOptions.map((project) => (
-                <option key={project._id} value={project._id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          </SelectField>
           <Field
             label="Tree code"
             name="treeCode"
@@ -271,95 +248,139 @@ export function AdminTreesTable() {
             required
           />
           <input type="hidden" name="currentHeightCm" value="0" />
-          <div className="sm:col-span-2">
-            <button
-              type="submit"
-              className="inline-flex h-10 items-center rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white hover:bg-[#163D2A]"
-            >
-              Create Tree
-            </button>
-          </div>
-        </form>
+        </FormPanel>
       )}
 
-      {error && <p className="mb-3 text-sm text-[#B3402F]">{error}</p>}
-
-      <div className="overflow-hidden rounded-2xl border border-[#e2e7e2] bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-[#e2e7e2] bg-[#FAFAF7]">
-            <tr>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Tree</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Project</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Operator</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Status</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Planted</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#e2e7e2]">
-            {isLoading ? (
-              <tr>
-                <td
-                  colSpan={6}
-                  className="px-5 py-8 text-center text-[#929A94]"
-                >
-                  Loading…
-                </td>
-              </tr>
-            ) : trees.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={6}
-                  className="px-5 py-8 text-center text-[#929A94]"
-                >
-                  No trees found
-                </td>
-              </tr>
-            ) : (
-              trees.map((tree) => (
-                <TreeRows
-                  key={tree._id}
-                  tree={tree}
-                  isEditing={editingId === tree._id}
-                  isPending={pendingId === tree._id}
-                  onStartEdit={() => setEditingId(tree._id)}
-                  onCancelEdit={() => setEditingId(null)}
-                  onSave={(form) => handleSave(tree._id, form)}
-                  onDelete={() => handleDelete(tree._id)}
-                />
-              ))
+      <TableCard
+        title="Trees"
+        meta={
+          pagination
+            ? `${pagination.total} tree${pagination.total === 1 ? "" : "s"}${hasFilters ? " matching the current filters" : " across every project"}`
+            : "Loading…"
+        }
+        actions={
+          <>
+            <FilterSelect
+              label="Filter by status"
+              value={status}
+              onChange={(value) => handleFilterChange(setStatus, value)}
+            >
+              <option value="">All statuses</option>
+              {STATUS_OPTIONS.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </FilterSelect>
+            <FilterSelect
+              label="Filter by project"
+              value={projectId}
+              onChange={(value) => handleFilterChange(setProjectId, value)}
+            >
+              <option value="">All projects</option>
+              {projectOptions.map((project) => (
+                <option key={project._id} value={project._id}>
+                  {project.name}
+                </option>
+              ))}
+            </FilterSelect>
+            <FilterSelect
+              label="Filter by operator"
+              value={operatorId}
+              onChange={(value) => handleFilterChange(setOperatorId, value)}
+            >
+              <option value="">All operators</option>
+              {operatorOptions.map((operator) => (
+                <option key={operator._id} value={operator._id}>
+                  {operator.fullName}
+                </option>
+              ))}
+            </FilterSelect>
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex h-9 items-center gap-1 rounded-xl px-2.5 text-xs font-bold text-[#667069] transition hover:text-[#B3402F]"
+              >
+                <X size={13} aria-hidden="true" />
+                Clear
+              </button>
             )}
-          </tbody>
-        </table>
-      </div>
-
-      {pagination && (
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <p className="text-[#929A94]">
-            {pagination.total === 0
-              ? "0 trees"
-              : `${skip + 1}–${Math.min(skip + LIMIT, pagination.total)} of ${pagination.total}`}
-          </p>
-          <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setSkip((s) => Math.max(0, s - LIMIT))}
-              disabled={skip === 0}
-              className="rounded-lg border border-[#d9e2da] px-3 py-1.5 font-bold text-[#163D2A] disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={() => setIsCreating((v) => !v)}
+              className={buttonClass(
+                isCreating ? "secondary" : "primary",
+                "sm",
+              )}
             >
-              Previous
+              {isCreating ? (
+                <X size={14} aria-hidden="true" />
+              ) : (
+                <Plus size={14} aria-hidden="true" />
+              )}
+              {isCreating ? "Close form" : "New Tree"}
             </button>
-            <button
-              type="button"
-              onClick={() => setSkip((s) => s + LIMIT)}
-              disabled={!pagination.hasMore}
-              className="rounded-lg border border-[#d9e2da] px-3 py-1.5 font-bold text-[#163D2A] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+          </>
+        }
+        footer={
+          pagination ? (
+            <Pagination
+              noun="trees"
+              skip={skip}
+              limit={LIMIT}
+              total={pagination.total}
+              hasMore={pagination.hasMore}
+              onPrev={() => setSkip((s) => Math.max(0, s - LIMIT))}
+              onNext={() => setSkip((s) => s + LIMIT)}
+            />
+          ) : undefined
+        }
+      >
+        <Table>
+          <Thead>
+            <Th>Tree</Th>
+            <Th>Project</Th>
+            <Th>Operator</Th>
+            <Th>Status</Th>
+            <Th>Planted</Th>
+            <Th align="right" srOnly>
+              Actions
+            </Th>
+          </Thead>
+          {isLoading ? (
+            <TableSkeleton columns={COLUMNS} />
+          ) : (
+            <tbody className="divide-y divide-[#e2e7e2]">
+              {trees.length === 0 ? (
+                <TableEmpty
+                  colSpan={COLUMNS}
+                  icon={<Sprout size={20} aria-hidden="true" />}
+                  title="No trees found"
+                  hint={
+                    hasFilters
+                      ? "Nothing matches these filters — try clearing one."
+                      : "Trees appear here once an operator registers them."
+                  }
+                />
+              ) : (
+                trees.map((tree) => (
+                  <TreeRows
+                    key={tree._id}
+                    tree={tree}
+                    isEditing={editingId === tree._id}
+                    isPending={pendingId === tree._id}
+                    onStartEdit={() => setEditingId(tree._id)}
+                    onCancelEdit={() => setEditingId(null)}
+                    onSave={(form) => handleSave(tree._id, form)}
+                    onDelete={() => handleDelete(tree._id)}
+                  />
+                ))
+              )}
+            </tbody>
+          )}
+        </Table>
+      </TableCard>
     </div>
   );
 }
@@ -385,46 +406,61 @@ function TreeRows({
 
   return (
     <>
-      <tr>
-        <td className="px-5 py-3">
-          <p className="font-[family-name:var(--font-geist-mono)] text-xs text-[#929A94]">
-            {tree.treeCode}
-          </p>
+      <tr className={isEditing ? "bg-[#FAFAF7]" : rowClass}>
+        <td className="px-5 py-4 align-middle">
+          <p className={`${mono} text-xs text-[#929A94]`}>{tree.treeCode}</p>
           <Link
             href={`/trees/${tree._id}`}
-            className="font-bold text-[#163D2A] hover:text-[#246B45] hover:underline"
+            className="font-bold text-[#163D2A] transition hover:text-[#246B45]"
           >
             {tree.species}
           </Link>
+          {isOnChain && (
+            <div className="mt-1.5">
+              <Pill tone="chain">TOKEN #{tree.tokenId}</Pill>
+            </div>
+          )}
         </td>
-        <td className="px-5 py-3 text-[#667069]">
+        <td className={cellClass}>
           {tree.projectId ? (
             <Link
               href={`/projects/${tree.projectId._id}`}
-              className="font-bold text-[#246B45] hover:text-[#163D2A] hover:underline"
+              className="font-semibold text-[#246B45] transition hover:text-[#163D2A]"
             >
               {tree.projectId.name}
             </Link>
           ) : (
-            "Unknown"
+            <span className="text-[#929A94]">Unknown</span>
           )}
         </td>
-        <td className="px-5 py-3 text-[#667069]">
-          {tree.projectId?.createdBy?.fullName ?? "Unknown"}
+        <td className={cellClass}>
+          {tree.projectId?.createdBy?.fullName ?? (
+            <span className="text-[#929A94]">Unknown</span>
+          )}
         </td>
-        <td className="px-5 py-3">
+        <td className="px-5 py-4 align-middle">
           <TreeStatusPill status={tree.status} />
         </td>
-        <td className="px-5 py-3 text-[#667069]">
-          {new Date(tree.plantedAt).toLocaleDateString()}
+        <td className={cellClass}>
+          <p className="font-semibold text-[#18201B]">
+            {new Date(tree.plantedAt).toLocaleDateString()}
+          </p>
+          <p className="text-xs text-[#929A94]">
+            {tree.currentHeightCm} cm · from {tree.initialHeightCm} cm
+          </p>
         </td>
-        <td className="px-5 py-3">
-          <div className="flex gap-3">
+        <td className="px-5 py-4 text-right align-middle">
+          <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={isEditing ? onCancelEdit : onStartEdit}
-              className="text-xs font-bold text-[#246B45] hover:underline"
+              className={buttonClass("secondary", "sm")}
             >
+              {isEditing ? (
+                <X size={13} aria-hidden="true" />
+              ) : (
+                <Pencil size={13} aria-hidden="true" />
+              )}
               {isEditing ? "Close" : "Edit"}
             </button>
             <button
@@ -436,82 +472,88 @@ function TreeRows({
                   : undefined
               }
               onClick={onDelete}
-              className="text-xs font-bold text-[#B3402F] hover:underline disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label={`Delete ${tree.treeCode}`}
+              className={buttonClass("danger", "sm")}
             >
-              Delete
+              <Trash2 size={13} aria-hidden="true" />
             </button>
           </div>
         </td>
       </tr>
       {isEditing && (
         <tr>
-          <td colSpan={6} className="bg-[#FAFAF7] px-5 py-5">
+          <td colSpan={6} className="bg-[#FAFAF7] px-5 pb-6 pt-0">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 onSave(new FormData(e.currentTarget));
               }}
-              className="grid gap-3 sm:grid-cols-2"
+              className="rounded-2xl border border-[#e2e7e2] bg-white p-6"
             >
-              <Field
-                label="Species"
-                name="species"
-                defaultValue={tree.species}
-                required
-              />
-              <Field
-                label="Latitude"
-                name="latitude"
-                type="number"
-                step="any"
-                defaultValue={String(tree.latitude)}
-                required
-              />
-              <Field
-                label="Longitude"
-                name="longitude"
-                type="number"
-                step="any"
-                defaultValue={String(tree.longitude)}
-                required
-              />
-              <Field
-                label="Planted at"
-                name="plantedAt"
-                type="date"
-                defaultValue={toDateInputValue(tree.plantedAt)}
-                required
-              />
-              <Field
-                label="Initial height (cm)"
-                name="initialHeightCm"
-                type="number"
-                defaultValue={String(tree.initialHeightCm)}
-                required
-              />
-              <Field
-                label="Current height (cm)"
-                name="currentHeightCm"
-                type="number"
-                defaultValue={String(tree.currentHeightCm)}
-                required
-              />
-              <p className="text-xs text-[#929A94] sm:col-span-2">
-                Status, token ID, and owner wallet aren't editable here —
-                they're synced from on-chain events only.
+              <p className="text-sm font-extrabold tracking-[-0.02em] text-[#163D2A]">
+                Correct field data · {tree.treeCode}
               </p>
-              <div className="flex items-end gap-2 sm:col-span-2">
+              <p className="mt-1 text-sm leading-6 text-[#667069]">
+                Status, token ID and owner wallet aren&rsquo;t editable here —
+                they&rsquo;re synced from on-chain events only.
+              </p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <Field
+                  label="Species"
+                  name="species"
+                  defaultValue={tree.species}
+                  required
+                />
+                <Field
+                  label="Latitude"
+                  name="latitude"
+                  type="number"
+                  step="any"
+                  defaultValue={String(tree.latitude)}
+                  required
+                />
+                <Field
+                  label="Longitude"
+                  name="longitude"
+                  type="number"
+                  step="any"
+                  defaultValue={String(tree.longitude)}
+                  required
+                />
+                <Field
+                  label="Planted at"
+                  name="plantedAt"
+                  type="date"
+                  defaultValue={toDateInputValue(tree.plantedAt)}
+                  required
+                />
+                <Field
+                  label="Initial height (cm)"
+                  name="initialHeightCm"
+                  type="number"
+                  defaultValue={String(tree.initialHeightCm)}
+                  required
+                />
+                <Field
+                  label="Current height (cm)"
+                  name="currentHeightCm"
+                  type="number"
+                  defaultValue={String(tree.currentHeightCm)}
+                  required
+                />
+              </div>
+              <div className="mt-6 flex flex-wrap gap-2 border-t border-[#e2e7e2] pt-5">
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="inline-flex h-10 items-center rounded-xl bg-[#246B45] px-4 text-sm font-bold text-white disabled:opacity-50"
+                  className={buttonClass("primary")}
                 >
-                  Save
+                  {isPending ? "Saving…" : "Save changes"}
                 </button>
                 <button
                   type="button"
                   onClick={onCancelEdit}
-                  className="inline-flex h-10 items-center rounded-xl border border-[#d9e2da] px-4 text-sm font-bold text-[#163D2A]"
+                  className={buttonClass("secondary")}
                 >
                   Cancel
                 </button>
@@ -521,39 +563,5 @@ function TreeRows({
         </tr>
       )}
     </>
-  );
-}
-
-function Field({
-  label,
-  name,
-  type = "text",
-  required,
-  defaultValue,
-  step,
-  placeholder,
-}: {
-  label: string;
-  name: string;
-  type?: string;
-  required?: boolean;
-  defaultValue?: string;
-  step?: string;
-  placeholder?: string;
-}) {
-  return (
-    <label className="block text-sm" htmlFor={name}>
-      <span className="font-bold text-[#163D2A]">{label}</span>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        step={step}
-        required={required}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        className="mt-1.5 w-full rounded-xl border border-[#d9e2da] px-3 py-2 text-sm outline-none focus:border-[#246B45]"
-      />
-    </label>
   );
 }

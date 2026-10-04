@@ -1,21 +1,24 @@
 // @/app/admin/layout.tsx
-import type { ReactNode } from "react";
-import { RoleHeader } from "@/components/RoleHeader";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { AdminShell } from "@/components/admin/AdminShell";
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
+  // Each page still runs its own guard — this one only exists so the shell can
+  // show who's signed in without every page passing the session down.
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    redirect("/login");
+  }
+
   return (
-    <div className="min-h-screen bg-[#FAFAF7]">
-      <RoleHeader
-        audience="Admin"
-        links={[
-          { label: "Dashboard", href: "/admin" },
-          { label: "Users", href: "/admin/users" },
-          { label: "Projects", href: "/admin/projects" },
-          { label: "Trees", href: "/admin/trees" },
-          { label: "Disputes", href: "/admin/disputes" },
-        ]}
-      />
+    <AdminShell
+      user={{
+        name: session.user.name ?? "Admin",
+        email: session.user.email ?? "",
+      }}
+    >
       {children}
-    </div>
+    </AdminShell>
   );
 }

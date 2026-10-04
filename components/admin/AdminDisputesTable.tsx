@@ -1,7 +1,23 @@
 "use client";
 
+import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  cellClass,
+  controlClass,
+  ErrorBanner,
+  mono,
+  Pagination,
+  Pill,
+  rowClass,
+  Table,
+  TableCard,
+  TableEmpty,
+  TableSkeleton,
+  Th,
+  Thead,
+} from "@/components/admin/ui";
 import { TREE_STATUS_LABEL } from "@/lib/tree-status";
 import type { ITree, TreeStatus } from "@/models";
 
@@ -16,7 +32,7 @@ type DisputedTree = Omit<ITree, "projectId"> & {
   projectId: DisputedTreeProject | null;
 };
 
-type Pagination = {
+type PaginationState = {
   total: number;
   limit: number;
   skip: number;
@@ -24,13 +40,14 @@ type Pagination = {
 };
 
 const LIMIT = 20;
+const COLUMNS = 5;
 const RESOLVE_OPTIONS = (Object.keys(TREE_STATUS_LABEL) as TreeStatus[]).filter(
   (status) => status !== "DRAFT" && status !== "DISPUTED",
 );
 
 export function AdminDisputesTable() {
   const [trees, setTrees] = useState<DisputedTree[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [pagination, setPagination] = useState<PaginationState | null>(null);
   const [skip, setSkip] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -91,132 +108,135 @@ export function AdminDisputesTable() {
 
   return (
     <div>
-      {error && <p className="mb-3 text-sm text-[#B3402F]">{error}</p>}
+      {error && <ErrorBanner>{error}</ErrorBanner>}
 
-      <div className="overflow-hidden rounded-2xl border border-[#e2e7e2] bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-[#e2e7e2] bg-[#FAFAF7]">
-            <tr>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Tree</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Project</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Operator</th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">
-                Last Updated
-              </th>
-              <th className="px-5 py-3 font-bold text-[#929A94]">Resolve to</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#e2e7e2]">
-            {isLoading ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-5 py-8 text-center text-[#929A94]"
-                >
-                  Loading…
-                </td>
-              </tr>
-            ) : trees.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-5 py-8 text-center text-[#929A94]"
-                >
-                  No disputed trees — queue is empty
-                </td>
-              </tr>
-            ) : (
-              trees.map((tree) => {
-                const isPending = pendingId === tree._id;
-                return (
-                  <tr key={tree._id}>
-                    <td className="px-5 py-3">
-                      <p className="font-[family-name:var(--font-geist-mono)] text-xs text-[#929A94]">
-                        {tree.treeCode}
-                      </p>
-                      <Link
-                        href={`/trees/${tree._id}`}
-                        className="font-bold text-[#163D2A] hover:text-[#246B45] hover:underline"
-                      >
-                        {tree.species}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 text-[#667069]">
-                      {tree.projectId ? (
+      <TableCard
+        title="Disputed trees"
+        meta={
+          pagination
+            ? pagination.total === 0
+              ? "Queue is empty"
+              : `${pagination.total} waiting on a decision`
+            : "Loading…"
+        }
+        actions={
+          pagination && pagination.total > 0 ? (
+            <Pill tone="bad">NEEDS REVIEW</Pill>
+          ) : (
+            <Pill tone="good">CLEAR</Pill>
+          )
+        }
+        footer={
+          pagination ? (
+            <Pagination
+              noun="disputes"
+              skip={skip}
+              limit={LIMIT}
+              total={pagination.total}
+              hasMore={pagination.hasMore}
+              onPrev={() => setSkip((s) => Math.max(0, s - LIMIT))}
+              onNext={() => setSkip((s) => s + LIMIT)}
+            />
+          ) : undefined
+        }
+      >
+        <Table>
+          <Thead>
+            <Th>Tree</Th>
+            <Th>Project</Th>
+            <Th>Operator</Th>
+            <Th>Last updated</Th>
+            <Th align="right">Resolve to</Th>
+          </Thead>
+          {isLoading ? (
+            <TableSkeleton columns={COLUMNS} />
+          ) : (
+            <tbody className="divide-y divide-[#e2e7e2]">
+              {trees.length === 0 ? (
+                <TableEmpty
+                  colSpan={COLUMNS}
+                  icon={<ShieldCheck size={20} aria-hidden="true" />}
+                  title="No disputed trees"
+                  hint="Nothing is waiting on an admin decision right now."
+                />
+              ) : (
+                trees.map((tree) => {
+                  const isPending = pendingId === tree._id;
+                  return (
+                    <tr key={tree._id} className={rowClass}>
+                      <td className="px-5 py-4 align-middle">
+                        <p className={`${mono} text-xs text-[#929A94]`}>
+                          {tree.treeCode}
+                        </p>
                         <Link
-                          href={`/projects/${tree.projectId._id}`}
-                          className="font-bold text-[#246B45] hover:text-[#163D2A] hover:underline"
+                          href={`/trees/${tree._id}`}
+                          className="font-bold text-[#163D2A] transition hover:text-[#246B45]"
                         >
-                          {tree.projectId.name}
+                          {tree.species}
                         </Link>
-                      ) : (
-                        "Unknown"
-                      )}
-                    </td>
-                    <td className="px-5 py-3 text-[#667069]">
-                      {tree.projectId?.createdBy?.fullName ?? "Unknown"}
-                    </td>
-                    <td className="px-5 py-3 text-[#667069]">
-                      {new Date(tree.updatedAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-5 py-3">
-                      <select
-                        value=""
-                        disabled={isPending}
-                        onChange={(e) => {
-                          const value = e.target.value as TreeStatus | "";
-                          if (value) handleResolve(tree._id, value);
-                        }}
-                        className="rounded-lg border border-[#d9e2da] bg-white px-2 py-1.5 text-sm outline-none focus:border-[#246B45] disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="">
-                          {isPending ? "Resolving…" : "Resolve to…"}
-                        </option>
-                        {RESOLVE_OPTIONS.map((statusOption) => (
-                          <option key={statusOption} value={statusOption}>
-                            {TREE_STATUS_LABEL[statusOption]}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="mt-1 text-[11px] text-[#929A94]">
-                        Mongo-only — on-chain stays DISPUTED
-                      </p>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {pagination && (
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <p className="text-[#929A94]">
-            {pagination.total === 0
-              ? "0 disputes"
-              : `${skip + 1}–${Math.min(skip + LIMIT, pagination.total)} of ${pagination.total}`}
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setSkip((s) => Math.max(0, s - LIMIT))}
-              disabled={skip === 0}
-              className="rounded-lg border border-[#d9e2da] px-3 py-1.5 font-bold text-[#163D2A] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              onClick={() => setSkip((s) => s + LIMIT)}
-              disabled={!pagination.hasMore}
-              className="rounded-lg border border-[#d9e2da] px-3 py-1.5 font-bold text-[#163D2A] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+                        <div className="mt-1.5">
+                          <Pill tone="bad">DISPUTED</Pill>
+                        </div>
+                      </td>
+                      <td className={cellClass}>
+                        {tree.projectId ? (
+                          <Link
+                            href={`/projects/${tree.projectId._id}`}
+                            className="font-semibold text-[#246B45] transition hover:text-[#163D2A]"
+                          >
+                            {tree.projectId.name}
+                          </Link>
+                        ) : (
+                          <span className="text-[#929A94]">Unknown</span>
+                        )}
+                      </td>
+                      <td className={cellClass}>
+                        <p className="font-semibold text-[#18201B]">
+                          {tree.projectId?.createdBy?.fullName ?? "Unknown"}
+                        </p>
+                        {tree.projectId?.createdBy?.email && (
+                          <p className="text-xs text-[#929A94]">
+                            {tree.projectId.createdBy.email}
+                          </p>
+                        )}
+                      </td>
+                      <td className={cellClass}>
+                        {new Date(tree.updatedAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-5 py-4 align-middle">
+                        <div className="flex flex-col items-end gap-1">
+                          <select
+                            value=""
+                            aria-label={`Resolve ${tree.treeCode} to a new status`}
+                            disabled={isPending}
+                            onChange={(e) => {
+                              const value = e.target.value as TreeStatus | "";
+                              if (value) handleResolve(tree._id, value);
+                            }}
+                            className={`${controlClass("sm")} max-w-[200px]`}
+                          >
+                            <option value="">
+                              {isPending ? "Resolving…" : "Resolve to…"}
+                            </option>
+                            {RESOLVE_OPTIONS.map((statusOption) => (
+                              <option key={statusOption} value={statusOption}>
+                                {TREE_STATUS_LABEL[statusOption]}
+                              </option>
+                            ))}
+                          </select>
+                          <p className="text-[11px] text-[#929A94]">
+                            Mongo-only — on-chain stays DISPUTED
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          )}
+        </Table>
+      </TableCard>
     </div>
   );
 }
