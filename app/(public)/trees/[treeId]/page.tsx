@@ -3,6 +3,7 @@ import type { Types } from "mongoose";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Logo } from "@/components/Logo";
+import { OperatorToolsPanel } from "@/components/operator/OperatorToolsPanel";
 import { TreePassportChainPanel } from "@/components/tree/TreePassportChainPanel";
 import { connectDB } from "@/lib/db/connection";
 import { TREE_STATUS_LABEL } from "@/lib/tree-status";
@@ -191,6 +192,12 @@ export default async function TreePassportPage(
         </div>
 
         <aside>
+          {tree.tokenId != null && (
+            <OperatorToolsPanel
+              mongoTreeId={tree._id.toString()}
+              tokenId={tree.tokenId}
+            />
+          )}
           <TreePassportChainPanel
             mongoTreeId={tree._id.toString()}
             tokenId={tree.tokenId ?? null}

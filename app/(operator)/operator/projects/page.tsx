@@ -54,7 +54,12 @@ export default async function OperatorProjectsPage() {
               className="flex items-center justify-between p-5"
             >
               <div>
-                <p className="font-extrabold text-[#163D2A]">{project.name}</p>
+                <Link
+                  href={`/projects/${project._id}`}
+                  className="font-extrabold text-[#163D2A] hover:text-[#246B45] hover:underline"
+                >
+                  {project.name}
+                </Link>
                 <p className="text-sm text-[#667069]">
                   {project.regency}, {project.province} ·{" "}
                   {project.targetTreeCount} trees target
