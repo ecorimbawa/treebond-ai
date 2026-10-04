@@ -1,4 +1,4 @@
-// @/components/admin/ui.tsx
+// @/components/console/ui.tsx
 // Shared chrome for every /admin page. Deliberately mirrors the public landing
 // page (app/(public)/page.tsx) — same palette, gold eyebrow + tight-tracked
 // extrabold headings, rounded-2xl white cards on #FAFAF7 — so the console
@@ -41,7 +41,7 @@ export function controlClass(
   return `${controlBase} ${size === "md" ? "h-10 px-3 text-sm" : "h-9 px-2.5 text-xs"} ${width === "full" ? "w-full" : "w-auto"}`;
 }
 
-export function AdminMain({ children }: { children: ReactNode }) {
+export function ConsoleMain({ children }: { children: ReactNode }) {
   return (
     <main className="mx-auto w-full max-w-[1280px] flex-1 px-5 pb-20 pt-10 lg:px-8">
       {children}

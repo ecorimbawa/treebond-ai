@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AuthImagePanel } from "@/components/auth/AuthImagePanel";
+import { WalletSignInButton } from "@/components/auth/WalletSignInButton";
 import { Logo } from "@/components/Logo";
 
 export default function CreateAccountPage() {
@@ -58,7 +59,19 @@ export default function CreateAccountPage() {
             Sponsor real trees and track their growth.
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+          <div className="mt-6">
+            <WalletSignInButton label="Continue with Wallet" />
+          </div>
+
+          <div className="my-6 flex items-center gap-3">
+            <span className="h-px flex-1 bg-[#e2e7e2]" />
+            <span className="text-[11px] font-extrabold tracking-[0.1em] text-[#929A94]">
+              OR
+            </span>
+            <span className="h-px flex-1 bg-[#e2e7e2]" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-1.5">
               <label
                 htmlFor="fullName"
@@ -138,7 +151,8 @@ export default function CreateAccountPage() {
 
           <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-[#929A94]">
             <Sprout size={13} aria-hidden="true" />
-            New accounts are registered as Sponsors.
+            New accounts are registered as Sponsors — with a wallet or an email,
+            either works.
           </p>
 
           <p className="mt-6 text-center text-sm text-[#667069]">

@@ -51,8 +51,8 @@ Saya telusuri ulang persis alur demo di PRD langkah-demi-langkah untuk cek ada d
 
 Dua item ⚠️ di atas murni **tampilan**, bukan logic yang rusak — datanya sudah ada di database/chain, cuma belum dirender. Kalau mau demo keliatan lengkap persis sesuai narasi PRD:
 
-- [ ] Tambahkan anomaly risk ke `TreePassportChainPanel` (atau tampilkan AI score dari evidence Mongo yang belum on-chain, biar sponsor tetap lihat progress walau verifier belum submit ke chain)
-- [ ] Tambahkan link "View Transaction" (`https://sepolia.arbiscan.io/tx/...`) di Tree Passport publik, bukan cuma di halaman verifier
+- [x] ~~Tambahkan anomaly risk ke `TreePassportChainPanel`~~ **SELESAI (2026-10-04).** Tree Passport publik sekarang punya kartu **AI ANALYSIS** (health, growth, tree detection + pill anomaly risk LOW/MEDIUM/HIGH) yang dibaca dari `AiAnalysis` milik evidence terbaru di Mongo — jadi sponsor lihat progress tanpa menunggu verifier submit ke chain.
+- [x] ~~Tambahkan link "View Transaction" di Tree Passport publik~~ **SELESAI (2026-10-04).** Baris Verification History yang punya `txHash` sekarang jadi link Arbiscan.
 
 ---
 
@@ -62,7 +62,12 @@ Tidak bikin flow putus, tapi secara PRD memang belum ada. Dikerjakan kalau scope
 
 - [ ] **IPFS pinning (§26-30)** — `imageCid`/`metadataCid` masih string form manual, bukan upload asli.
 - [ ] **AI Verification asli (§31-34)** — skor diisi manual oleh operator (`AiAnalysis.modelName: "manual-entry"`), bukan dari model vision beneran.
-- [ ] **Wallet linking (§17-18)** — model `Wallet` ada tapi nol pemakaian. Dashboard sponsor scope by wallet yang *sedang connect*, bukan wallet yang di-link ke akun.
+- [x] ~~**Wallet linking (§17-18)** — model `Wallet` ada tapi nol pemakaian.~~ **SELESAI (2026-10-04).** `Wallet` sekarang jadi tulang punggung role Sponsor:
+  - **Login/register pakai wallet (SIWE)** — provider `siwe` di `auth.ts`, nonce httpOnly sekali pakai (`lib/siwe.ts`), verifikasi via `viem/siwe`. Alamat yang belum diklaim otomatis dibuatkan akun sponsor (`lib/wallet-account.ts`).
+  - **`/dashboard/wallets`** — link wallet tambahan (SIWE), set primary, unlink. Unlink wallet terakhir ditolak kalau akun belum punya email+password.
+  - **`/api/dashboard/sponsor` scope by akun, bukan wallet yang connect** — dan tidak lagi menerima `?ownerWallet=` dari client (dulu siapapun bisa enumerate portfolio wallet orang lain).
+  - **`/dashboard` digate** di `proxy.ts`; sponsor tree sendiri tetap bebas login sesuai PRD §8.
+  - **`/dashboard/settings`** — akun wallet-first bisa menambah email+password belakangan (`User.placeholderEmail`).
 
 ---
 

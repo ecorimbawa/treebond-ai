@@ -21,7 +21,7 @@ import {
   TableSkeleton,
   Th,
   Thead,
-} from "@/components/admin/ui";
+} from "@/components/console/ui";
 import { TreeStatusPill } from "@/components/tree/TreeStatusPill";
 import { TREE_STATUS_LABEL } from "@/lib/tree-status";
 import type { ITree, TreeStatus } from "@/models";

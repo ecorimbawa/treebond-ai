@@ -1,5 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { connectDB } from "@/lib/db/connection";
+import { linkedAddressesFor } from "@/lib/wallet-account";
 import { Tree, TreeEvidence, Verification } from "@/models";
 
 type Activity = {
@@ -11,26 +13,46 @@ type Activity = {
   date: Date;
 };
 
-// Dashboard aggregate for the sponsor's wallet: owned trees, how many of
-// their verification events have actually passed (PRD §72's "Total
-// Verified"), and a merged recent-activity feed across evidence +
-// verification records — the closest honest substitute for push
-// notifications (PRD §8's "Receive Monitoring Updates") without building a
-// full notification system.
-export async function GET(request: NextRequest) {
+// Dashboard aggregate for the signed-in sponsor: owned trees across every
+// wallet linked to the account, how many of their verification events have
+// actually passed (PRD §72's "Total Verified"), and a merged recent-activity
+// feed across evidence + verification records — the closest honest substitute
+// for push notifications (PRD §8's "Receive Monitoring Updates") without
+// building a full notification system.
+//
+// Scoped by session rather than an `ownerWallet` query param: the param
+// version let anyone enumerate any wallet's portfolio, and pinned the
+// dashboard to whichever wallet happened to be connected instead of the
+// account's own.
+export async function GET() {
   try {
-    const ownerWallet = new URL(request.url).searchParams
-      .get("ownerWallet")
-      ?.toLowerCase();
-    if (!ownerWallet) {
+    const session = await auth();
+    if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: "ownerWallet query param is required" },
-        { status: 400 },
+        { success: false, error: "Sign in required" },
+        { status: 401 },
       );
     }
 
     await connectDB();
-    const trees = await Tree.find({ ownerWallet })
+    const addresses = await linkedAddressesFor(session.user.id);
+
+    if (addresses.length === 0) {
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            trees: [],
+            totalVerified: 0,
+            recentActivity: [],
+            linkedWallets: 0,
+          },
+        },
+        { status: 200 },
+      );
+    }
+
+    const trees = await Tree.find({ ownerWallet: { $in: addresses } })
       .populate("projectId")
       .sort({ createdAt: -1 });
     const treeIds = trees.map((t) => t._id);
@@ -93,7 +115,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        data: { trees, totalVerified, recentActivity: activity },
+        data: {
+          trees,
+          totalVerified,
+          recentActivity: activity,
+          linkedWallets: addresses.length,
+        },
       },
       { status: 200 },
     );

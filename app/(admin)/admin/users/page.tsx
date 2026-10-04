@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminUsersTable } from "@/components/admin/AdminUsersTable";
-import { AdminMain, Callout, PageHeader } from "@/components/admin/ui";
+import { Callout, ConsoleMain, PageHeader } from "@/components/console/ui";
 
 export default async function AdminUsersPage() {
   const session = await auth();
@@ -13,7 +13,7 @@ export default async function AdminUsersPage() {
   }
 
   return (
-    <AdminMain>
+    <ConsoleMain>
       <PageHeader
         eyebrow="ADMIN · USERS"
         title="User Management"
@@ -41,6 +41,6 @@ export default async function AdminUsersPage() {
       <div className="mt-8">
         <AdminUsersTable currentUserId={session.user.id} />
       </div>
-    </AdminMain>
+    </ConsoleMain>
   );
 }

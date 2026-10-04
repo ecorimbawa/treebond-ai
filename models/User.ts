@@ -8,6 +8,7 @@ export interface IUser extends Document {
   fullName: string;
   avatarUrl?: string;
   role: UserRole;
+  placeholderEmail: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +39,14 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: ["sponsor", "operator", "verifier", "admin"],
       default: "sponsor",
+    },
+    // Wallet-first sign-ups have no email to give, but `email` is a required
+    // unique index — so they get a synthetic one and this flag marks it as
+    // not-a-real-address. Defaults to false, which is also what every
+    // pre-existing email account reads back as.
+    placeholderEmail: {
+      type: Boolean,
+      default: false,
     },
   },
   {

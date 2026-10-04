@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
 import { AuthImagePanel } from "@/components/auth/AuthImagePanel";
+import { WalletSignInButton } from "@/components/auth/WalletSignInButton";
 import { Logo } from "@/components/Logo";
 
 const HOME_BY_ROLE: Record<string, string> = {
@@ -65,7 +66,19 @@ export default function LoginPage() {
             Log in to track your sponsored trees.
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+          <div className="mt-6">
+            <WalletSignInButton label="Continue with Wallet" />
+          </div>
+
+          <div className="my-6 flex items-center gap-3">
+            <span className="h-px flex-1 bg-[#e2e7e2]" />
+            <span className="text-[11px] font-extrabold tracking-[0.1em] text-[#929A94]">
+              OR
+            </span>
+            <span className="h-px flex-1 bg-[#e2e7e2]" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-1.5">
               <label
                 htmlFor="email"
@@ -126,7 +139,7 @@ export default function LoginPage() {
 
           <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-[#929A94]">
             <Sprout size={13} aria-hidden="true" />
-            This is a hackathon MVP. Auth is minimal by design.
+            Signing in with a wallet creates a Sponsor account automatically.
           </p>
 
           <p className="mt-6 text-center text-sm text-[#667069]">

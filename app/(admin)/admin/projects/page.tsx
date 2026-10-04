@@ -3,7 +3,7 @@ import { Blocks } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminProjectsTable } from "@/components/admin/AdminProjectsTable";
-import { AdminMain, Callout, PageHeader } from "@/components/admin/ui";
+import { Callout, ConsoleMain, PageHeader } from "@/components/console/ui";
 
 export default async function AdminProjectsPage() {
   const session = await auth();
@@ -12,7 +12,7 @@ export default async function AdminProjectsPage() {
   }
 
   return (
-    <AdminMain>
+    <ConsoleMain>
       <PageHeader
         eyebrow="ADMIN · PROJECTS"
         title="All Projects"
@@ -36,6 +36,6 @@ export default async function AdminProjectsPage() {
       <div className="mt-8">
         <AdminProjectsTable />
       </div>
-    </AdminMain>
+    </ConsoleMain>
   );
 }

@@ -16,7 +16,7 @@ import {
   TableSkeleton,
   Th,
   Thead,
-} from "@/components/admin/ui";
+} from "@/components/console/ui";
 import type { IProject } from "@/models";
 
 type AdminProject = Omit<IProject, "createdBy"> & {

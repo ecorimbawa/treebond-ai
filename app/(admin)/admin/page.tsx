@@ -17,12 +17,12 @@ import type { ReactNode } from "react";
 import { auth } from "@/auth";
 import { GrantRoleForm } from "@/components/admin/GrantRoleForm";
 import {
-  AdminMain,
   buttonClass,
+  ConsoleMain,
   mono,
   PageHeader,
   SectionLabel,
-} from "@/components/admin/ui";
+} from "@/components/console/ui";
 import { connectDB } from "@/lib/db/connection";
 import {
   BlockchainTransaction,
@@ -107,7 +107,7 @@ export default async function AdminDashboardPage() {
   const stats = await getAdminStats();
 
   return (
-    <AdminMain>
+    <ConsoleMain>
       <PageHeader
         eyebrow="ADMIN · CONTROL ROOM"
         title="Every tree, project and verifier — in one view."
@@ -279,7 +279,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
       </section>
-    </AdminMain>
+    </ConsoleMain>
   );
 }
 

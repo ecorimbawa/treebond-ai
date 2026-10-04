@@ -9,13 +9,13 @@ Dokumen ini menjelaskan role yang **benar-benar ada di implementasi saat ini** (
 | # | Role | Tipe | Perlu login? | Di-gate oleh |
 | --- | --- | --- | --- | --- |
 | 1 | **Visitor** | Bukan role DB | Tidak | — |
-| 2 | **Sponsor** | `User.role` di MongoDB | Tidak sebenarnya* | — (lihat catatan di bawah) |
+| 2 | **Sponsor** | `User.role` di MongoDB + `Wallet` (SIWE) | Ya, untuk `/dashboard` | `proxy.ts` session-only + `auth()` tiap API route |
 | 3 | **Operator** | `User.role` di MongoDB | Ya | `proxy.ts` + `session.user.role` tiap API route |
 | 4 | **Verifier** | `User.role` di MongoDB | Ya | sama |
 | 5 | **Admin** | `User.role` di MongoDB | Ya | sama |
 | 6 | **Oracle** | Private key di server (`ORACLE_PRIVATE_KEY`), **bukan** akun yang login | — | `ORACLE_ROLE` on-chain di `VerificationRegistry` |
 
-*Sponsor ditandai bintang karena ini nuansa penting — dijelaskan di bagian 2.
+Sponsor punya dua jalur masuk (wallet atau email) dan satu-satunya role yang bisa didapat tanpa provisioning manual — detail di bagian 2.
 
 ---
 
@@ -44,9 +44,6 @@ Kalau mau bikin akun: `/login` atau `/create-account`.
 
 ## 2. Sponsor
 
-### Cara jadi Sponsor
-Self-register lewat `/create-account` → `POST /api/auth/register` → otomatis `role: "sponsor"` (`app/api/auth/register/route.ts:45`). Ini satu-satunya role yang bisa didapat sendiri tanpa provisioning manual.
-
 ### Journey (PRD §8)
 ```
 Explore Trees → Select Tree → View Tree Passport
@@ -61,13 +58,24 @@ Tunggu konfirmasi → browser POST txHash ke
   ↓
 Tree berubah status jadi SPONSORED, ownerWallet ter-update
   ↓
-/dashboard — lihat semua tree yang dimiliki wallet ini
+/dashboard — portfolio semua tree dari semua wallet yang ter-link ke akun
 ```
 
-### ⚠️ Catatan penting
-**Login sebagai Sponsor saat ini tidak menggerbang apapun.** `/dashboard` (`app/(sponsor)/dashboard/page.tsx`) murni berdasarkan **wallet yang sedang connect** (`useAccount()` dari wagmi) dan fetch `/api/trees?ownerWallet=<address>` — tidak ada pengecekan session/login sama sekali. `/dashboard` juga tidak ada di daftar proteksi `proxy.ts`.
+### Cara jadi Sponsor (diperbarui 2026-10-04)
+Dua jalur, dua-duanya langsung `role: "sponsor"`:
 
-Artinya: Visitor yang belum pernah daftar akun pun bisa connect wallet, sponsor tree, dan buka `/dashboard` untuk lihat tree miliknya — persis sama seperti user yang sudah login sebagai Sponsor. Akun Sponsor saat ini baru berguna untuk hal yang belum dibangun (wallet-linking §18, notifikasi §71).
+1. **Wallet (SIWE / EIP-4361)** — tombol "Continue with Wallet" di `/login` maupun `/create-account`. Sign message (bukan transaksi, nol gas) → provider `siwe` di `auth.ts` verifikasi lewat `viem/siwe` → alamat yang belum diklaim siapapun otomatis dibuatkan akun sponsor + row `Wallet`. Jadi login dan register itu tombol yang sama.
+2. **Email + password** — `/create-account` → `POST /api/auth/register`, seperti sebelumnya.
+
+Akun wallet-first dapat `email` sintetis (`<address>@wallet.treebond.local`) dengan flag `User.placeholderEmail: true`; dari `/dashboard/settings` mereka bisa menambah email + password asli supaya punya dua jalan masuk.
+
+### Gating
+`/dashboard` **wajib login** (`proxy.ts` matcher `/dashboard/:path*`, session-only — role apapun boleh buka portfolio-nya sendiri). Yang **tidak** digate: browsing `/explore`, `/trees/[id]`, dan aksi sponsor itu sendiri — visitor tanpa akun tetap bisa connect wallet dan sponsor tree persis seperti PRD §8.
+
+Tree yang disponsori anonim **otomatis ter-klaim** begitu wallet yang sama sign-in: `Wallet` row dibuat saat login, dan `/api/dashboard/sponsor` query `Tree.find({ ownerWallet: { $in: <alamat ter-link> } })`. Kalau sponsor dilakukan sambil sudah login, `/api/trees/[id]/sponsor` yang me-link wallet-nya (chain sudah membuktikan kepemilikan alamat, jadi tidak perlu SIWE lagi).
+
+### Wallet linking (§17-18)
+`/dashboard/wallets` — link wallet tambahan lewat SIWE, set primary, unlink. Satu akun bisa banyak wallet dan portfolio-nya gabungan semuanya. Unlink wallet terakhir ditolak kalau akun itu belum punya email+password (kalau tidak, pemiliknya terkunci permanen).
 
 ---
 

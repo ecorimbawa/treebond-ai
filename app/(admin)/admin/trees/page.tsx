@@ -3,7 +3,7 @@ import { Sprout } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminTreesTable } from "@/components/admin/AdminTreesTable";
-import { AdminMain, Callout, PageHeader } from "@/components/admin/ui";
+import { Callout, ConsoleMain, PageHeader } from "@/components/console/ui";
 
 export default async function AdminTreesPage() {
   const session = await auth();
@@ -12,7 +12,7 @@ export default async function AdminTreesPage() {
   }
 
   return (
-    <AdminMain>
+    <ConsoleMain>
       <PageHeader
         eyebrow="ADMIN · TREES"
         title="All Trees"
@@ -35,6 +35,6 @@ export default async function AdminTreesPage() {
       <div className="mt-8">
         <AdminTreesTable />
       </div>
-    </AdminMain>
+    </ConsoleMain>
   );
 }

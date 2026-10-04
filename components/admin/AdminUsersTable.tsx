@@ -20,7 +20,7 @@ import {
   TableSkeleton,
   Th,
   Thead,
-} from "@/components/admin/ui";
+} from "@/components/console/ui";
 import type { UserRole } from "@/models";
 
 type AdminUser = {

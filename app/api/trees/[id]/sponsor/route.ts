@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { parseEventLogs, TransactionReceiptNotFoundError } from "viem";
 import { z } from "zod";
+import { auth } from "@/auth";
 import { CHAIN_ID, CONTRACTS } from "@/contracts/generated/addresses";
 import { connectDB } from "@/lib/db/connection";
 import { TreeBondAbi } from "@/lib/web3/abis/TreeBond";
 import { serverClient } from "@/lib/web3/server-client";
-import { BlockchainTransaction, Tree } from "@/models";
+import { BlockchainTransaction, Tree, Wallet } from "@/models";
 
 const bodySchema = z.object({
   txHash: z.string().regex(/^0x[a-fA-F0-9]{64}$/),
@@ -134,6 +135,29 @@ export async function POST(
       status: "success",
       gasUsed: receipt.gasUsed.toString(),
     });
+
+    // Sponsoring while signed in links that wallet to the account, so the
+    // tree shows up on /dashboard without a separate linking step. The chain
+    // already proved control of the address, so no SIWE signature is needed
+    // here. Anonymous sponsors are unaffected — they claim the tree later by
+    // signing in with the same wallet.
+    const session = await auth();
+    const sponsorAddress = sponsor.toLowerCase();
+    if (session?.user) {
+      const claimed = await Wallet.findOne({ address: sponsorAddress });
+      if (!claimed) {
+        const walletCount = await Wallet.countDocuments({
+          userId: session.user.id,
+        });
+        await Wallet.create({
+          userId: session.user.id,
+          address: sponsorAddress,
+          chainId: CHAIN_ID,
+          isPrimary: walletCount === 0,
+          verifiedAt: new Date(),
+        });
+      }
+    }
 
     return NextResponse.json({ success: true, data: updated }, { status: 200 });
   } catch (error) {

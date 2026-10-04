@@ -4,7 +4,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { KeyRound, TriangleAlert, Wallet } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { useAccount } from "wagmi";
-import { buttonClass, Field, mono, SelectField } from "@/components/admin/ui";
+import { buttonClass, Field, mono, SelectField } from "@/components/console/ui";
 import { useEnsureArbitrumSepolia } from "@/hooks";
 import { useGrantRole } from "@/hooks/write/use-grant-role";
 import { useRevokeRole } from "@/hooks/write/use-revoke-role";
